@@ -1,8 +1,8 @@
-# Hearth — Build, Ship, Shape: Amazon Developer Hackathon
+# Homebase — Build, Ship, Shape: Amazon Developer Hackathon
 
 **Pitch:** A busy two-adult household can plan the week's dinners, split the chores, and cook hands-free just by talking to Alexa+, instead of juggling a notes app, a group chat and a greasy phone screen, because a stateful Alexa+ MCP add-on remembers the household and drives a Fire TV "kitchen board" in real time.
 **The moment:** Hands covered in flour, someone says *"Alexa, next step"* and the Fire TV moves to step 4 and starts its 8-minute timer. Then *"Alexa, who's on dishes tonight?"* gets the answer from a chore rota Alexa set up on Monday.
-**The measured claim:** On a scripted set of 40 household requests, Hearth's tools are called correctly in **X/40** cases (target ≥ 34). p95 tool latency is **Y ms** against Alexa+'s 500 ms budget. A full recipe is cooked with **0 remote presses**. Measured by `eval/run_eval.ts` (MCP client replay) plus a latency log.
+**The measured claim:** On a scripted set of 40 household requests, Homebase's tools are called correctly in **X/40** cases (target ≥ 34). p95 tool latency is **Y ms** against Alexa+'s 500 ms budget. A full recipe is cooked with **0 remote presses**. Measured by `eval/run_eval.ts` (MCP client replay) plus a latency log.
 **Planned:** 2026-10-08 · **Deadline:** Fri 2026-10-23 12:00 PT = **14:00 CT** · **Submit by:** **Thu 2026-10-22 18:00 CT**
 
 ## 1. Hackathon Facts
@@ -43,7 +43,7 @@ AI-assisted judging is possible, so the README claim→code table, spoken claims
 
 ## 3. Winner Patterns for This Event
 - This is the first edition, so there are no winners yet. The gallery is hidden. Cross-event base rates apply: a retellable moment, one measured claim, verification visible, voice/physical-world input, sponsor feature that carries real weight.
-- The rubric names the "obvious" ideas to avoid: a single-turn Q&A bot, a basic MCP wrapper around an existing API, a basic streaming UI. Hearth must never look like "a recipe API behind MCP". **Memory across sessions + driving the TV + chores** is the difference.
+- The rubric names the "obvious" ideas to avoid: a single-turn Q&A bot, a basic MCP wrapper around an existing API, a basic streaming UI. Homebase must never look like "a recipe API behind MCP". **Memory across sessions + driving the TV + chores** is the difference.
 - Amazon is visibly pushing **MCP add-ons, MCP Apps and Agent Skills** for Alexa+, and Vega OS for Fire TV. Using their newest surfaces in earnest is the sponsor-fit lever.
 - Product feedback and the friction log are explicitly rewarded. DevRel judges want to learn what's broken, so honest, specific friction notes help us.
 
@@ -51,17 +51,17 @@ AI-assisted judging is possible, so the README claim→code table, spoken claims
 ### Scoring matrix (each criterion 1–5, equal weight; modifiers on the right)
 | Idea | Tech | Design | Impact | Idea | Insider | Moment | Evidence | Buildable | Prizes | Risk | Total |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| **A+D Hearth** (household memory + chores + cook-along on TV) | 5 | 5 | 5 | 5 | 0 | 2 | 2 | 1 | 2 | −2 | **25** |
+| **A+D Homebase** (household memory + chores + cook-along on TV) | 5 | 5 | 5 | 5 | 0 | 2 | 2 | 1 | 2 | −2 | **25** |
 | A Cook-along only | 5 | 5 | 4 | 5 | 0 | 2 | 2 | 1 | 2 | −2 | 24 |
 | B Fitness CV coach | 4 | 4 | 4 | 5 | 0 | 2 | 2 | 1 | 1 | −2 | 21 |
 | D Chores/meal agent only | 4 | 3 | 4 | 3 | 0 | 1 | 2 | 2 | 2 | −1 | 20 |
 | C Household-aware watch picks | 3 | 4 | 3 | 4 | 0 | 1 | 1 | 1 | 1 | −1 | 17 |
 
-### Chosen: Hearth (A + D), decided by the user 2026-10-08
+### Chosen: Homebase (A + D), decided by the user 2026-10-08
 It hits the creative examples for Alexa+ (stateful, multi-step agentic workflow, cards) and Fire TV (multi-modal voice + D-pad + visual) at the same time. That lifts Quality of Idea and Design without leaving our two tracks. The household memory turns it from a single-turn recipe bot into an ongoing assistant, which is the Impact story.
 
 ### Runner-up (fallback if M0 fails)
-**Hearth-Sim:** the same MCP server and Fire TV board, but the Alexa+ layer is the rules-sanctioned **simulated Alexa+ web app** (Bedrock/Claude as the agent calling our MCP tools). Use this if the real add-on can't deploy or test by Oct 11. Fallback 2: idea B (fitness coach).
+**Homebase-Sim:** the same MCP server and Fire TV board, but the Alexa+ layer is the rules-sanctioned **simulated Alexa+ web app** (Bedrock/Claude as the agent calling our MCP tools). Use this if the real add-on can't deploy or test by Oct 11. Fallback 2: idea B (fitness coach).
 
 ### Novelty check
 - Comparables: the native Alexa recipe experience on Echo Show, and chore apps like OurHome and Sweepy.
@@ -128,7 +128,7 @@ It hits the creative examples for Alexa+ (stateful, multi-step agentic workflow,
 - [ ] `spike/mcp`: minimal Streamable HTTP server with an `echo_household` tool that writes a counter to DynamoDB, deployed publicly — Done when: MCP Inspector calls the tool against the public URL; latency logged — Type: S
 - [ ] `alexa-ai new mcp` + `deploy` pointing at the spike; test in the web simulator — Done when: an utterance triggers the tool and Alexa speaks the result; screenshot saved — Type: S + H
 - [ ] `spike/tv`: Vega RN app polling or subscribing to the counter — Done when: the number on the Fire TV changes within ~1 s of the Alexa utterance — Type: S
-- [ ] H: **Go/No-go.** Fail on the Alexa+ deploy → switch to Hearth-Sim (record in §10) — Type: H
+- [ ] H: **Go/No-go.** Fail on the Alexa+ deploy → switch to Homebase-Sim (record in §10) — Type: H
 
 ### Milestone 1: Skeleton live (Oct 10–12)
 - [ ] `contracts/`: TypeScript types for Household, Member, MealPlan, Recipe/Step, Chore, CookSession, ShoppingList; tool names + JSON schemas; TV event schema — Done when: both builders sign off; typecheck passes — Type: S + H
@@ -152,7 +152,7 @@ Tools (each <500 ms, unit-tested):
 - [ ] `eval/requests.yaml`: 40 realistic household requests with expected tool + args (written by humans, not the agent) — Type: H
 - [ ] `eval/run_eval.ts`: replays via an LLM-driven MCP client (Bedrock) and scores tool choice and args; `RESULTS.md` — Done when: reproducible with one command — Type: S + W
 - [ ] Latency: log p50/p95 per tool → `eval/latency.md`; fix anything >400 ms — Type: S
-- [ ] Real-household test: cook one real dinner with Hearth; note failures and measure "remote presses" + "apps opened" vs the usual way — Type: H
+- [ ] Real-household test: cook one real dinner with Homebase; note failures and measure "remote presses" + "apps opened" vs the usual way — Type: H
 
 ### Milestone 4: Moment & polish (Oct 16–19)
 - [ ] MCP Apps cards for the week plan + chore rota (if Alexa+ renders them; otherwise skip and note in the friction log) — Type: S
@@ -170,7 +170,7 @@ Tools (each <500 ms, unit-tested):
 ### Milestone 6: Demo video (rough cut Oct 20, final Oct 21)
 | Time | Beat (narrate every claim) |
 |---|---|
-| 0:00–0:15 | Kitchen, Fire TV on. "Dinner in a two-job household means five apps and a greasy phone. Hearth is an Alexa+ add-on that remembers your household and turns your Fire TV into the kitchen board." |
+| 0:00–0:15 | Kitchen, Fire TV on. "Dinner in a two-job household means five apps and a greasy phone. Homebase is an Alexa+ add-on that remembers your household and turns your Fire TV into the kitchen board." |
 | 0:15–0:50 | "Alexa, plan dinners this week, Maya's allergic to peanuts." The board fills in. "Split the chores fairly." Rota appears. |
 | 0:50–1:40 | Cut to "Thursday". "Alexa, what's for dinner?" (memory). "Let's cook it." TV switches to Now Cooking. Hands busy: "next step", "set the timer". **0 remote presses.** Quick D-pad fallback shot. |
 | 1:40–2:00 | **The moment:** "Who's on dishes tonight?" "Arjun. And you're out of rice, I added it to the list." |
@@ -186,7 +186,7 @@ Tools (each <500 ms, unit-tested):
 ## 9. Risks & Contingencies
 | Risk | Likelihood | Mitigation / fallback |
 |---|---|---|
-| Alexa+ add-on deploy/testing blocked (allowlist, OAuth, region) | Med | M0 tests first. Fallback: Hearth-Sim (simulated Alexa+ web app, allowed by the rules) |
+| Alexa+ add-on deploy/testing blocked (allowlist, OAuth, region) | Med | M0 tests first. Fallback: Homebase-Sim (simulated Alexa+ web app, allowed by the rules) |
 | OAuth 2.1 required even at dev stage | Med | Use a minimal hosted OAuth (Cognito supports PKCE) with one demo user. Budget 2 S |
 | >500 ms tool latency (cold starts) | Med | Provisioned concurrency or a warm ping; no LLM in the request path; fall back to App Runner |
 | Fire TV device isn't Vega OS | Med | Use the Vega Virtual Device for the Vega build and show it in the video; or RN for Fire OS on the device |
@@ -208,3 +208,12 @@ Tools (each <500 ms, unit-tested):
 - Log any SDK/doc friction to FRICTION_LOG.md as you hit it.
 - Keep PROJECT.md current. Commit at every milestone; small commits throughout.
 - Do not put instructions aimed at judges or AI reviewers in the repo, README, or video. Be clear and truthful only.
+
+## 11. Research-driven changes (2026-10-08, see RESEARCH.md and PLAN.md)
+- Renamed **Hearth → Homebase** (collides with the funded "Hearth Display" family hub).
+- Realtime TV channel: **SSE via Lambda response streaming**, not API Gateway WebSocket.
+- **Account linking (OAuth 2.1 + PKCE via Cognito) is likely required.** Household tools are user-specific, which triggers Tier 2 auth. M0 confirms whether dev stage allows skipping it.
+- Recipes are LLM-generated, plus a **deterministic allergen verifier**. Show it in the demo: "blocked a satay recipe because Maya is allergic to peanuts." This gives a visible verification moment.
+- Pitch emphasis: Alexa+ already does basic meal plans and Echo Show cook-along. Our differentiator is the **persistent household memory + fair chore rota on the shared TV**. Say this in the video and README.
+- Confirm the Fire TV model runs **Vega OS** (e.g. Fire TV Stick 4K Select). Otherwise use the Vega Virtual Device.
+- Model: Claude **Haiku 5.5** on Bedrock (≈ $0.001 per weekly plan).

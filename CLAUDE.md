@@ -1,5 +1,5 @@
-# Hearth — Amazon "Build, Ship, Shape" hackathon entry
-See PROJECT.md for project context and HACKATHON_PLAN.md for milestones.
+# Homebase — Amazon "Build, Ship, Shape" hackathon entry
+See PROJECT.md for project context. PLAN.md is the build plan; HACKATHON_PLAN.md governs scope and dates until submission (2026-10-22).
 
 ## Agent Rules
 - Before using any library/SDK/API (MCP SDK, Alexa+ toolkit, Vega SDK, AWS), fetch its latest official docs; never code from memory.
