@@ -152,8 +152,8 @@ STRIPE_SECRET_KEY=           # M8 only, test mode
 
 Tasks:
 - [ ] Human: Devpost registration; AWS account + $10 budget alarm + Bedrock model access; `alexa-ai` CLI installed and `configure`d; Vega SDK + Virtual Device installed; Fire TV registered as a developer device (record model + OS in `docs/NOTES.md`) — Done when: each CLI's hello-world command succeeds
-- [ ] Fetch current docs (MCP spec 2025-11-25, TS SDK 1.32.x, Alexa+ MCP toolkit overview/quickstart/auth/testing, Vega RN getting started, Lambda response streaming) and write `docs/01-platform-notes.md` — Done when: the file answers (a) is account linking required at dev stage, (b) the MCP Apps surfaces, (c) SSE/fetch-streaming support in Vega RN
-- [ ] `spike/server`: one `bump_counter` tool + `GET /events` SSE endpoint on Lambda (Function URL, streaming), writing to DynamoDB — Done when: MCP Inspector calls the tool on the public URL; `curl -N /events` shows the event; p95 of 20 calls <500 ms logged
+- [x] Fetch current docs (MCP spec 2025-11-25, TS SDK 1.32.x, Alexa+ MCP toolkit overview/quickstart/auth/testing, Vega RN getting started, Lambda response streaming) and write `docs/01-platform-notes.md` — Done when: the file answers (a) is account linking required at dev stage, (b) the MCP Apps surfaces, (c) SSE/fetch-streaming support in Vega RN
+- [~] `spike/server`: one `bump_counter` tool + `GET /events` SSE endpoint on Lambda (Function URL, streaming), writing to DynamoDB — Done when: MCP Inspector calls the tool on the public URL; `curl -N /events` shows the event; p95 of 20 calls <500 ms logged — *2026-10-08: done locally + via cloudflared tunnel (p95 131 ms, in-memory store); Lambda + DynamoDB pending AWS setup*
 - [ ] `alexa-ai new mcp` + `deploy` to the spike URL; test in the web simulator — Done when: an utterance triggers `bump_counter` and Alexa replies; screenshot in `docs/`
 - [ ] `spike/tv`: Vega app subscribing to `/events` — Done when: the number on the Fire TV changes within ~1 s of the Alexa utterance
 - [ ] Human: go/no-go recorded in Notes & Decisions (fallback: simulated Alexa+ web voice layer)

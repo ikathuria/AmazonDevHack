@@ -76,7 +76,7 @@ docs/             # numbered kebab-case docs
 
 | Milestone | Status | Notes |
 |---|---|---|
-| 0. Spike | ☐ todo | Alexa+ → MCP → DynamoDB → SSE → Vega |
+| 0. Spike | ◐ in progress | MCP+SSE spike works locally + via tunnel (p95 131 ms); blocked on human setup: AWS, `alexa-ai` CLI access, Vega SDK |
 | 1. Scaffold | ☐ | |
 | 2. Core feature | ☐ | |
 | 3. Data + evidence | ☐ | |
@@ -85,7 +85,7 @@ docs/             # numbered kebab-case docs
 | 6. Pilot & retention gate | ☐ | Oct 26 – Nov 22 |
 | 7–9. Certify / Monetize / Polish | ☐ | gated on M6 |
 
-**In progress now:** planning done.
+**In progress now:** M0. Spike server done (see docs/01-platform-notes.md); waiting on human setup.
 **Next up:** M0 human setup (AWS, `alexa-ai configure`, Vega SDK, Fire TV dev mode).
 
 ---
