@@ -59,7 +59,11 @@ for (const r of requests) {
     const msg = (err as Error).message.slice(0, 120).replaceAll("|", "/");
     rows.push(`| ${r.id} | ${r.utterance.replaceAll("|", "/")} | \`${r.expect.tool}\` | ⚠️ error: ${msg} | – | – |`);
     console.log(`! ${r.id}: ${msg}`);
-    if (errored >= 3 && toolOk === 0 && allOk === 0) break;
+    if (errored >= 3 && toolOk === 0 && allOk === 0) {
+      // Every call is failing (access/billing), so there's no score to report. Don't write a misleading results file.
+      console.error("\nAborted: the first requests all failed at the infrastructure level. Fix Bedrock access and rerun; eval/RESULTS.md was not written.");
+      process.exit(2);
+    }
     continue;
   }
   const first = turn.calls[0];
