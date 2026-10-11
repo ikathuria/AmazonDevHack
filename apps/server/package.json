@@ -11,7 +11,9 @@
     "test": "vitest run",
     "seed": "tsx src/scripts/seed.ts",
     "journey": "tsx src/scripts/live-journey.ts",
-    "bench": "tsx src/scripts/bench.ts"
+    "bench": "tsx src/scripts/bench.ts",
+    "latency": "tsx src/scripts/latency.ts",
+    "eval": "tsx src/scripts/run-eval.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1149.0",

@@ -42,7 +42,7 @@ export class HomebaseStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_24_X,
       architecture: lambda.Architecture.ARM_64,
       bundling: { format: cdk.aws_lambda_nodejs.OutputFormat.ESM, target: "node24", banner: "import { createRequire } from 'module';const require = createRequire(import.meta.url);" },
-      environment: { TABLE_NAME: table.tableName, PLAN_QUEUE_URL: planQueue.queueUrl, DEMO_HOUSEHOLD_ID: "patels", BEDROCK_MODEL_ID: bedrockModelId },
+      environment: { TABLE_NAME: table.tableName, PLAN_QUEUE_URL: planQueue.queueUrl, DEMO_HOUSEHOLD_ID: "patels", PROTECTED_HOUSEHOLDS: "patels", BEDROCK_MODEL_ID: bedrockModelId },
       // esbuild resolves deps from each source file, so apps/server and packages/contracts use their own node_modules.
       projectRoot: repoRoot,
       depsLockFilePath: path.join(repoRoot, "apps/server/package-lock.json"),

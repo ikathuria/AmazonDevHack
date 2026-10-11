@@ -1,0 +1,8 @@
+{
+  "_readme": "Tool-selection eval set. HUMANS write these (not the coding agent) so the eval isn't tuned to the tool descriptions. Target: 40 realistic things a family would say. 'expect.tool' is the first tool Alexa should call; 'expect.args' are key/value pairs that must appear (case-insensitive substring match on strings, exact on others). The three entries below are format examples; replace or keep them.",
+  "requests": [
+    { "id": "ex-1", "utterance": "what's for dinner tonight?", "expect": { "tool": "get_plan" } },
+    { "id": "ex-2", "utterance": "Maya is allergic to sesame now", "expect": { "tool": "update_member_preferences", "args": { "member": "maya" } } },
+    { "id": "ex-3", "utterance": "who's doing the dishes?", "expect": { "tool": "whos_on", "args": { "chore": "dish" } } }
+  ]
+}

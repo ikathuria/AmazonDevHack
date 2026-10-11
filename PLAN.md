@@ -193,10 +193,10 @@ Tasks (each tool: <200 ms target, unit tests colocated, idempotency key where it
 **Goal:** schema stable, latency proven, tool-selection quality measured.
 
 Tasks:
-- [ ] `docs/03-data-model.md`: single-table access patterns; migration-free versioned item schema (`v` attr) — Done when: every tool's access pattern is listed and covered by a test
-- [ ] `delete_household_data` + `export_household` (JSON) tools and web buttons — Done when: tests confirm zero items remain after delete; export validates against contracts
-- [ ] `eval/requests.yaml`: 40 human-written household requests with expected tool + args; `eval/run_eval.ts` scores an LLM MCP client against the tools → `eval/RESULTS.md` — Done when: reproducible with `npm run eval`
-- [ ] Latency report `eval/latency.md` (p50/p95 per tool from 200 replayed calls) — Done when: all tools p95 <500 ms (target <200)
+- [x] `docs/03-data-model.md`: single-table access patterns; migration-free versioned item schema (`v` attr) — Done when: every tool's access pattern is listed and covered by a test
+- [x] `delete_household_data` + `export_household` (JSON) tools and web buttons *(tools done + tested; demo household protected via `PROTECTED_HOUSEHOLDS`; web buttons are Builder 2's)* — Done when: tests confirm zero items remain after delete; export validates against contracts
+- [~] `eval/requests.yaml`: 40 human-written household requests with expected tool + args; `eval/run_eval.ts` scores an LLM MCP client against the tools → `eval/RESULTS.md` — Done when: reproducible with `npm run eval` *(runner done: `npm --prefix apps/server run eval`, format in `eval/requests.json` with 3 examples. Waiting on: humans write the 40 requests; Bedrock Anthropic use-case form)*
+- [x] Latency report `eval/latency.md` (p50/p95 per tool from 200 replayed calls) — Done when: all tools p95 <500 ms (target <200)
 - [ ] Gate: lint, typecheck, full test suite pass
 
 ### Milestone 4: UI/UX (Oct 16–19; hackathon FEATURE FREEZE Mon Oct 19 22:00 CT)

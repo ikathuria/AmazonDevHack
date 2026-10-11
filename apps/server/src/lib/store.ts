@@ -12,6 +12,8 @@ export interface Store {
   listDocs<T>(householdId: string, prefix: string): Promise<T[]>;
   appendEvent(householdId: string, event: HomebaseEvent): Promise<StoredEvent>;
   eventsAfter(householdId: string, seq: number, limit?: number): Promise<StoredEvent[]>;
+  // Removes every item for the household (docs, events, counter). Returns how many items were deleted.
+  deleteHousehold(householdId: string): Promise<number>;
 }
 
 const pk = (householdId: string) => `HH#${householdId}`;
@@ -40,6 +42,14 @@ export class MemoryStore implements Store {
   }
   async eventsAfter(householdId: string, seq: number, limit = 50) {
     return (this.events.get(householdId) ?? []).filter((e) => e.seq > seq).slice(0, limit);
+  }
+  async deleteHousehold(householdId: string) {
+    const prefix = `${pk(householdId)}|`;
+    const keys = [...this.docs.keys()].filter((k) => k.startsWith(prefix));
+    for (const k of keys) this.docs.delete(k);
+    const events = this.events.get(householdId)?.length ?? 0;
+    this.events.delete(householdId);
+    return keys.length + events;
   }
 }
 
@@ -87,6 +97,27 @@ export class DynamoStore implements Store {
       Limit: limit,
     }));
     return (r.Items ?? []).map((i) => i.doc as StoredEvent);
+  }
+
+  async deleteHousehold(householdId: string) {
+    let removed = 0;
+    let startKey: Record<string, unknown> | undefined;
+    do {
+      const page = await this.db.send(new QueryCommand({
+        TableName: this.table,
+        KeyConditionExpression: "pk = :pk",
+        ExpressionAttributeValues: { ":pk": pk(householdId) },
+        ProjectionExpression: "pk, sk",
+        ExclusiveStartKey: startKey,
+      }));
+      const keys = page.Items ?? [];
+      for (let i = 0; i < keys.length; i += 25) {
+        await this.db.send(new BatchWriteCommand({ RequestItems: { [this.table]: keys.slice(i, i + 25).map((k) => ({ DeleteRequest: { Key: { pk: k.pk, sk: k.sk } } })) } }));
+      }
+      removed += keys.length;
+      startKey = page.LastEvaluatedKey;
+    } while (startKey);
+    return removed;
   }
 
   // Used by the seed script only.
