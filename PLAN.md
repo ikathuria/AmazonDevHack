@@ -176,17 +176,17 @@ Tasks:
 **Goal:** by voice, a household plans the week, splits chores, and cooks hands-free with the TV following along.
 
 Tasks (each tool: <200 ms target, unit tests colocated, idempotency key where it writes):
-- [ ] `features/household`: `get_household`, `update_member_preferences` (allergies/diets/dislikes) — Done when: tests pass; Inspector call round-trips
-- [ ] `features/pantry`: `list_pantry`, `add_pantry_items`, `remove_pantry_items` — Done when: tests pass
-- [ ] `features/meals`: `plan_week` enqueues an SQS job and returns "drafting" immediately; worker calls Bedrock with household context → MealPlan; `get_plan(day)` — Done when: the plan lands in DynamoDB <30 s in an integration test with a mocked Bedrock
-- [ ] `features/meals/allergen-verifier.ts`: deterministic check of each recipe's ingredients vs every member's allergies (tag table + synonyms, e.g. "groundnut"→peanut); rejected recipes are regenerated once, then dropped with a reason — Done when: 30 fixture cases pass incl. 10 adversarial synonyms
-- [ ] `features/chores`: `set_chores`, `assign_chores` (deterministic fair rotation weighted by effort + history; LLM only writes the friendly explanation, async), `whos_on(chore, day)`, `mark_chore_done`, `chore_balance` — Done when: fairness test: over 8 simulated weeks, the effort difference between members ≤ 1 chore-unit
-- [ ] `features/cook`: `start_cooking(recipe|today)`, `next_step`, `previous_step`, `repeat_step`, `start_timer` → emit SSE events — Done when: an integration test drives a session and an SSE client receives ordered events
-- [ ] `features/shopping`: `shopping_list` (plan ingredients minus pantry), `add_to_list`, `check_off` — Done when: tests pass
-- [ ] `lib/sse.ts` + `GET /households/:id/events` (auth'd by a TV pairing token) with heartbeat + resume via Last-Event-ID — Done when: reconnect test replays missed events
+- [x] `features/household`: `get_household`, `update_member_preferences` (allergies/diets/dislikes) — Done when: tests pass; Inspector call round-trips
+- [x] `features/pantry`: `list_pantry`, `add_pantry_items`, `remove_pantry_items` — Done when: tests pass
+- [x] `features/meals`: `plan_week` enqueues an SQS job and returns "drafting" immediately; worker calls Bedrock with household context → MealPlan; `get_plan(day)` — Done when: the plan lands in DynamoDB <30 s in an integration test with a mocked Bedrock
+- [x] `features/meals/allergen-verifier.ts`: deterministic check of each recipe's ingredients vs every member's allergies (tag table + synonyms, e.g. "groundnut"→peanut); rejected recipes are regenerated once, then dropped with a reason — Done when: 30 fixture cases pass incl. 10 adversarial synonyms
+- [x] `features/chores`: `set_chores`, `assign_chores` (deterministic fair rotation weighted by effort + history; LLM only writes the friendly explanation, async), `whos_on(chore, day)`, `mark_chore_done`, `chore_balance` — Done when: fairness test: over 8 simulated weeks, the effort difference between members ≤ 1 chore-unit
+- [x] `features/cook`: `start_cooking(recipe|today)`, `next_step`, `previous_step`, `repeat_step`, `start_timer` → emit SSE events — Done when: an integration test drives a session and an SSE client receives ordered events
+- [x] `features/shopping`: `shopping_list` (plan ingredients minus pantry), `add_to_list`, `check_off` — Done when: tests pass
+- [~] `lib/sse.ts` + `GET /households/:id/events` (auth'd by a TV pairing token) with heartbeat + resume via Last-Event-ID *(done in `app.ts` incl. `GET /households/:id/state` snapshot and `POST /api/tools/:name` for D-pad; pairing-token auth waits for M5)* — Done when: reconnect test replays missed events
 - [ ] `apps/tv`: pairing-code screen (code shown on TV, entered on web) → Kitchen Board tabs: This Week / Chores / Now Cooking / Shopping; consumes SSE; D-pad actions call the same backend endpoints — Done when: on Vega Virtual Device + real Fire TV, the board updates from Alexa utterances
 - [ ] `addon/addon.json`: tool descriptions + example phrases; `alexa-ai deploy` — Done when: the 12 scripted demo utterances work in the simulator; tag `demo-safe-1`
-- [ ] E2E: script `eval/e2e-demo.ts` drives MCP tool calls for the demo journey and asserts SSE events + DynamoDB state — Done when: passes locally and in CI
+- [x] E2E: script `eval/e2e-demo.ts` drives MCP tool calls for the demo journey and asserts SSE events + DynamoDB state — Done when: passes locally and in CI
 - [ ] Gate: lint, typecheck, full test suite pass
 
 ### Milestone 3: Data layer hardening + evidence (Oct 15–17)
@@ -280,6 +280,9 @@ claude "Read PLAN.md and PROJECT.md. Without building anything new, test everyth
 ---
 
 ## Notes & Decisions
+
+- 2026-10-11 — M2 server tools done (19 tools, one registry → MCP + REST + future sim agent). Live journey: p50 ~95 ms, warm first call 467 ms; EventBridge warm-up every 5 min. `set_chores` folded into seed data (chores are seeded; editing them is a web-app task). E2E lives in `apps/server/src/demo-journey.test.ts` (in CI) plus `npm --prefix apps/server run journey -- <url>` for the live stack.
+- 2026-10-11 — Bedrock in Lambda fails with "Model use case details have not been submitted": the Anthropic use-case form must be filled in by the account owner. Until then the deterministic planner runs (verified safe).
 
 - 2026-10-11 — Alexa AI CLI blocked: AssumeRole into Amazon's role denied (account not allowlisted). Asked organizers. Per the M0 go/no-go, the **simulated Alexa+ web voice layer is the demo path** until access arrives; the same MCP server serves both.
 - 2026-10-11 — Bedrock: Haiku 5.5 not enabled on the account, so default is `us.anthropic.claude-haiku-4-5-20251001-v1:0` (≈$0.013/plan), configurable via CDK context `bedrockModelId`.

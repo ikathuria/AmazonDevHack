@@ -4,7 +4,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand, BatchWriteCommand } from "@aws-sdk/lib-dynamodb";
 import type { HomebaseEvent, StoredEvent } from "./contracts.js";
 
-export type DocKind = "PROFILE" | "PANTRY" | "CHORES" | "PLAN" | "SHOPPING" | "COOK" | `RECIPE#${string}`;
+export type DocKind = "PROFILE" | "PANTRY" | "CHORES" | "CHORE_STATE" | "PLAN" | "SHOPPING" | "COOK" | `RECIPE#${string}`;
 
 export interface Store {
   getDoc<T>(householdId: string, kind: DocKind): Promise<T | undefined>;

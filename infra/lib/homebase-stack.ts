@@ -12,6 +12,8 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as events from "aws-cdk-lib/aws-events";
+import * as targets from "aws-cdk-lib/aws-events-targets";
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const serverSrc = path.join(repoRoot, "apps/server/src");
@@ -62,6 +64,16 @@ export class HomebaseStack extends cdk.Stack {
       authType: lambda.FunctionUrlAuthType.NONE,
       invokeMode: lambda.InvokeMode.RESPONSE_STREAM,
       cors: { allowedOrigins: ["*"], allowedMethods: [lambda.HttpMethod.ALL], allowedHeaders: ["*"] },
+    });
+
+    // Keep one server instance warm so Alexa+ never waits on a cold start (first call was ~1.1 s vs the 500 ms budget).
+    new events.Rule(this, "WarmServer", {
+      schedule: events.Schedule.rate(cdk.Duration.minutes(5)),
+      // Shaped like a Function URL request so the normal HTTP handler answers it.
+      targets: [new targets.LambdaFunction(server, { event: events.RuleTargetInput.fromObject({
+        version: "2.0", routeKey: "$default", rawPath: "/health", rawQueryString: "", headers: { host: "warmup" }, isBase64Encoded: false,
+        requestContext: { http: { method: "GET", path: "/health", protocol: "HTTP/1.1", sourceIp: "127.0.0.1", userAgent: "warmup" }, domainName: "warmup" },
+      }) })],
     });
 
     const worker = new NodejsFunction(this, "Worker", {
