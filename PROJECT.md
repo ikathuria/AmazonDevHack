@@ -42,16 +42,16 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 
 ---
 
-## Project structure (planned; not yet scaffolded)
+## Project structure
 
 ```
-apps/server/      # MCP server + SSE + worker (features/{household,meals,chores,pantry,cook,shopping})
+apps/server/      # MCP server + REST + SSE + sim agent + worker (features/{household,meals,chores,pantry,cook,shopping}; lib/{tools,store,queue,agent,llm,docs,time})
 apps/tv/          # Vega Kitchen Board
 apps/web/         # setup / login / board / export
 packages/contracts/  # shared zod schemas & types
 infra/            # CDK
 eval/             # tool-selection eval + latency + e2e demo
-addon/            # alexa-ai add-on package
+addon/            # alexa-ai add-on package draft (addon.json; media from scripts/make-addon-media.py)
 docs/             # numbered kebab-case docs
 ```
 
@@ -78,14 +78,14 @@ docs/             # numbered kebab-case docs
 |---|---|---|
 | 0. Spike | ◐ | MCP+SSE proven locally, via tunnel and on Lambda. Alexa+ deploy blocked on account allowlisting → simulated Alexa+ path is the demo fallback |
 | 1. Scaffold | ◐ | server/contracts/infra/CI done and deployed (us-east-1). Remaining: `apps/tv`, `apps/web` (Builder 2), BRAND.md gate |
-| 2. Core feature | ☐ | |
-| 3. Data + evidence | ☐ | |
+| 2. Core feature | ◐ | 22 server tools live + tested (MCP/REST/sim). Remaining: Vega TV app (Builder 2), real Alexa+ deploy (blocked) |
+| 3. Data + evidence | ◐ | data model doc, export/delete, latency report (p95 101 ms) done; eval runner done, needs 40 human requests + Bedrock form |
 | 4. UI/UX | ☐ | hackathon freeze Mon Oct 19 22:00 CT |
 | 5. Auth (account linking) | ☐ | parallel track |
 | 6. Pilot & retention gate | ☐ | Oct 26 – Nov 22 |
 | 7–9. Certify / Monetize / Polish | ☐ | gated on M6 |
 
-**In progress now:** M2 tools (household, pantry, meals + allergen verifier, chores, cook, shopping).
+**In progress now:** waiting on human gates (Bedrock use-case form, Alexa CLI allowlist, eval requests, BRAND.md); Builder 2 on the Vega TV app. Simulated Alexa+ at `<ServerUrl>/sim`.
 **Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws` (MCP at `/mcp`, TV feed at `/households/patels/events`). Redeploy: `npm run deploy`; reseed: `TABLE_NAME=<CDK output> npm run seed`.
 **Next up:** M0 human setup (AWS, `alexa-ai configure`, Vega SDK, Fire TV dev mode).
 
