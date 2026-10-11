@@ -1,0 +1,18 @@
+{
+  "name": "homebase",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install:all": "npm --prefix packages/contracts i && npm --prefix apps/server i && npm --prefix infra i",
+    "build": "npm --prefix apps/server run build",
+    "lint": "npm --prefix packages/contracts run lint && npm --prefix apps/server run lint && npm --prefix infra run lint",
+    "typecheck": "npm --prefix packages/contracts run typecheck && npm --prefix apps/server run typecheck && npm --prefix infra run typecheck",
+    "test": "npm --prefix packages/contracts test && npm --prefix apps/server test",
+    "dev": "npm --prefix apps/server run dev",
+    "seed": "npm --prefix apps/server run seed",
+    "deploy": "npm --prefix infra run deploy"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}
