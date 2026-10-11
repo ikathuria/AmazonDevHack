@@ -55,7 +55,7 @@ MCP tools never call an LLM; they read and write DynamoDB and return in about 10
 
 - `npm test` runs 73 tests: contracts, allergen verifier, chore fairness, the full demo journey through a real MCP client, SSE resume, export/delete, and the agent loop.
 - [`eval/latency.md`](eval/latency.md): live per-tool latency.
-- [`eval/RESULTS.md`](eval/RESULTS.md) (pending): tool-selection accuracy on 40 casual household requests (agent-written at the team's request; same agent wrote the tool descriptions, so read the score as optimistic) (`npm --prefix apps/server run eval`).
+- [`eval/RESULTS.md`](eval/RESULTS.md): **37/40** right tool + arguments (Claude Haiku 4.5 on Bedrock as the client). The 3 misses are context-free cook-along commands ("next", "say that again?", "let's make dinner"), each run with no conversation history. Tool-selection accuracy on 40 casual household requests (agent-written at the team's request; same agent wrote the tool descriptions, so read the score as optimistic) (`npm --prefix apps/server run eval`).
 
 ## Responsible AI
 
