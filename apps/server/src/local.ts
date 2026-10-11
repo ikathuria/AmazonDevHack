@@ -5,6 +5,7 @@ import { createApp } from "./app.js";
 import { MemoryStore, storeFromEnv } from "./lib/store.js";
 import { MemoryQueue } from "./lib/queue.js";
 import { bedrockLlm } from "./lib/llm.js";
+import { bedrockChatModel } from "./lib/agent.js";
 import { runJob } from "./jobs.js";
 import { seedHousehold } from "./scripts/seed-data.js";
 
@@ -17,6 +18,6 @@ const llm = process.env.LOCAL_LLM === "1" ? bedrockLlm() : undefined;
 const queue = new MemoryQueue((job) => runJob(job, store, llm));
 
 const port = Number(process.env.PORT ?? 8787);
-serve({ fetch: createApp({ store, queue, demoHouseholdId }).fetch, port }, () =>
+serve({ fetch: createApp({ store, queue, demoHouseholdId, chatModel: llm ? bedrockChatModel() : undefined }).fetch, port }, () =>
   console.log(`homebase server on http://localhost:${port} (${store instanceof MemoryStore ? "memory" : "dynamodb"} store, planner: ${llm ? "bedrock" : "deterministic"})`),
 );

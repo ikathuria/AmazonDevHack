@@ -199,6 +199,13 @@ Tasks:
 - [x] Latency report `eval/latency.md` (p50/p95 per tool from 200 replayed calls) — Done when: all tools p95 <500 ms (target <200)
 - [ ] Gate: lint, typecheck, full test suite pass
 
+### Milestone 3b: Simulated Alexa+ (hackathon fallback path, added 2026-10-11)
+**Goal:** the rules' alternate Alexa+ path works end to end on the same tools, in case CLI access never arrives.
+
+- [x] `lib/agent.ts`: Bedrock Converse tool-use loop over the tool registry (unit-tested with a scripted model)
+- [x] `POST /api/sim/converse` + `GET /sim` page: voice in (Web Speech API), spoken replies, tool-call chips, live family-board mirror via `/state` + SSE — Done when: page renders and updates live (verified locally 2026-10-11)
+- [ ] Live LLM replies — blocked on the Bedrock Anthropic use-case form (account owner)
+
 ### Milestone 4: UI/UX (Oct 16–19; hackathon FEATURE FREEZE Mon Oct 19 22:00 CT)
 **Goal:** a real family can use the TV board and the web app without explanation.
 

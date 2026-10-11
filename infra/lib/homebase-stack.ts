@@ -59,6 +59,12 @@ export class HomebaseStack extends cdk.Stack {
     });
     table.grantReadWriteData(server);
     planQueue.grantSendMessages(server);
+    // Only the simulated Alexa+ endpoint (/api/sim/converse) uses Bedrock on the server; MCP tools never do.
+    const bedrockInvoke = new iam.PolicyStatement({
+      actions: ["bedrock:InvokeModel", "bedrock:Converse"],
+      resources: ["arn:aws:bedrock:*::foundation-model/anthropic.*", `arn:aws:bedrock:*:${this.account}:inference-profile/*`],
+    });
+    server.addToRolePolicy(bedrockInvoke);
 
     const url = server.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,
@@ -86,10 +92,7 @@ export class HomebaseStack extends cdk.Stack {
     });
     table.grantReadWriteData(worker);
     worker.addEventSource(new SqsEventSource(planQueue, { batchSize: 1 }));
-    worker.addToRolePolicy(new iam.PolicyStatement({
-      actions: ["bedrock:InvokeModel", "bedrock:Converse"],
-      resources: ["arn:aws:bedrock:*::foundation-model/anthropic.*", `arn:aws:bedrock:*:${this.account}:inference-profile/*`],
-    }));
+    worker.addToRolePolicy(bedrockInvoke);
 
     new cdk.CfnOutput(this, "ServerUrl", { value: url.url });
     new cdk.CfnOutput(this, "TableName", { value: table.tableName });

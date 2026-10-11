@@ -9,6 +9,9 @@ import type { Queue } from "./lib/queue.js";
 import { registerMcpTools, runTool, type ToolContext } from "./lib/tools.js";
 import { docs } from "./lib/docs.js";
 import { allTools } from "./features/index.js";
+import { runAgentTurn, type ChatModel } from "./lib/agent.js";
+import { SIM_PAGE } from "./sim-page.js";
+import type { Message } from "@aws-sdk/client-bedrock-runtime";
 
 export type AppOptions = {
   store: Store;
@@ -20,9 +23,11 @@ export type AppOptions = {
   pollMs?: number;
   // Max lifetime of one SSE response before the client reconnects with Last-Event-ID (Lambda max is 15 min).
   streamMaxMs?: number;
+  // LLM behind the simulated Alexa+ experience (/sim). Omit to disable it.
+  chatModel?: ChatModel;
 };
 
-export function createApp({ store, queue, demoHouseholdId, now = () => new Date(), pollMs = 1000, streamMaxMs = 10 * 60_000 }: AppOptions) {
+export function createApp({ store, queue, demoHouseholdId, now = () => new Date(), pollMs = 1000, streamMaxMs = 10 * 60_000, chatModel }: AppOptions) {
   const app = new Hono();
   const ctxFor = (householdId = demoHouseholdId): ToolContext => ({ store, queue, householdId, now });
 
@@ -49,6 +54,25 @@ export function createApp({ store, queue, demoHouseholdId, now = () => new Date(
     const args = await c.req.json().catch(() => ({}));
     const r = await runTool(tool, ctxFor(), args);
     return c.json(r, r.isError ? 400 : 200);
+  });
+
+  // Simulated Alexa+ (the hackathon rules' alternate path): an LLM plays Alexa and calls the same Homebase tools.
+  // Clearly labelled as a simulation in the page; the real path is the MCP endpoint above.
+  app.get("/sim", (c) => c.html(SIM_PAGE));
+  app.post("/api/sim/converse", async (c) => {
+    if (!chatModel) return c.json({ error: "simulator disabled" }, 503);
+    const body = await c.req.json().catch(() => ({})) as { utterance?: string; history?: Message[] };
+    const utterance = (body.utterance ?? "").trim().slice(0, 300);
+    if (!utterance) return c.json({ error: "say something" }, 400);
+    const ctx = ctxFor();
+    await store.appendEvent(ctx.householdId, { type: "voice.heard", utterance: utterance.slice(0, 200) });
+    try {
+      const turn = await runAgentTurn({ utterance, history: (body.history ?? []).slice(-12), tools: allTools, ctx, model: chatModel });
+      return c.json({ reply: turn.reply, calls: turn.calls, history: turn.history.slice(-12) });
+    } catch (err) {
+      console.error("[sim]", err);
+      return c.json({ reply: "Sorry, the Alexa simulator can't reach its language model right now.", calls: [], history: body.history ?? [] }, 502);
+    }
   });
 
   // Full snapshot for a TV/board on first load; afterwards it follows the SSE feed.

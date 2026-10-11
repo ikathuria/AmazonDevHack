@@ -62,3 +62,28 @@ describe("server app", () => {
     expect(body).not.toContain("first");
   });
 });
+
+describe("simulated Alexa+", () => {
+  it("serves the simulator page", async () => {
+    const app = createApp({ store: new MemoryStore(), queue: new MemoryQueue(), demoHouseholdId: "patels" });
+    const res = await app.request("/sim");
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain("Alexa+ simulator");
+  });
+
+  it("returns 503 when no chat model is configured", async () => {
+    const app = createApp({ store: new MemoryStore(), queue: new MemoryQueue(), demoHouseholdId: "patels" });
+    const res = await app.request("/api/sim/converse", { method: "POST", body: JSON.stringify({ utterance: "hi" }) });
+    expect(res.status).toBe(503);
+  });
+
+  it("runs a turn through the agent and records what Alexa heard", async () => {
+    const store = await seededStore();
+    const model = async () => ({ role: "assistant" as const, content: [{ text: "Hello from the simulator." }] });
+    const app = createApp({ store, queue: new MemoryQueue(), demoHouseholdId: "patels", chatModel: model });
+    const res = await app.request("/api/sim/converse", { method: "POST", body: JSON.stringify({ utterance: "hello" }) });
+    expect((await res.json()).reply).toBe("Hello from the simulator.");
+    const events = await store.eventsAfter("patels", 0);
+    expect(events[0].event).toEqual({ type: "voice.heard", utterance: "hello" });
+  });
+});
