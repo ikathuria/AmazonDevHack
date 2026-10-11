@@ -38,9 +38,30 @@ function argsMatch(expected: Record<string, unknown> = {}, actual: Record<string
 }
 
 const rows: string[] = [];
-let toolOk = 0, allOk = 0;
+let toolOk = 0, allOk = 0, errored = 0;
+async function attempt(utterance: string) {
+  for (let i = 0; ; i++) {
+    try {
+      return await runAgentTurn({ utterance, tools: allTools, ctx, model, dryRun: true });
+    } catch (err) {
+      if (i >= 2) throw err;
+      await new Promise((res) => setTimeout(res, 2000 * (i + 1)));
+    }
+  }
+}
 for (const r of requests) {
-  const turn = await runAgentTurn({ utterance: r.utterance, tools: allTools, ctx, model, dryRun: true });
+  let turn: Awaited<ReturnType<typeof attempt>>;
+  try {
+    turn = await attempt(r.utterance);
+  } catch (err) {
+    // Infrastructure errors (throttling, access) are reported separately, never counted as model misses.
+    errored++;
+    const msg = (err as Error).message.slice(0, 120).replaceAll("|", "/");
+    rows.push(`| ${r.id} | ${r.utterance.replaceAll("|", "/")} | \`${r.expect.tool}\` | ⚠️ error: ${msg} | – | – |`);
+    console.log(`! ${r.id}: ${msg}`);
+    if (errored >= 3 && toolOk === 0 && allOk === 0) break;
+    continue;
+  }
   const first = turn.calls[0];
   const chosen = first?.name ?? "(none)";
   const exact = chosen === r.expect.tool;
@@ -58,11 +79,12 @@ const md = `# Tool-selection eval results
 Run ${new Date().toISOString()} · model \`${process.env.BEDROCK_MODEL_ID ?? "us.anthropic.claude-haiku-4-5-20251001-v1:0"}\` acting as the Alexa+ client · ${allTools.length} Homebase tools · dry run (write tools not executed).
 Reproduce: \`npm --prefix apps/server run eval\`. Requests: [\`eval/requests.json\`](requests.json) · written by: ${author}.
 
-**Right tool: ${toolOk}/${requests.length}. Right tool and arguments: ${allOk}/${requests.length}.**
+**Right tool: ${toolOk}/${requests.length - errored}. Right tool and arguments: ${allOk}/${requests.length - errored}.**${errored ? ` (${errored} request(s) errored at the infrastructure level and are excluded; see table.)` : ""}
 
 | id | Request | Expected | Chosen (args) | Tool | Tool + args |
 |---|---|---|---|---|---|
 ${rows.join("\n")}
 `;
 writeFileSync(join(root, "eval/RESULTS.md"), md);
-console.log(`\nright tool ${toolOk}/${requests.length}, tool+args ${allOk}/${requests.length} → eval/RESULTS.md`);
+console.log(`\nright tool ${toolOk}/${requests.length - errored}, tool+args ${allOk}/${requests.length - errored}, errored ${errored} → eval/RESULTS.md`);
+if (errored) process.exitCode = 1;
