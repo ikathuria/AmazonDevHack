@@ -195,7 +195,7 @@ Tasks (each tool: <200 ms target, unit tests colocated, idempotency key where it
 Tasks:
 - [x] `docs/03-data-model.md`: single-table access patterns; migration-free versioned item schema (`v` attr) — Done when: every tool's access pattern is listed and covered by a test
 - [x] `delete_household_data` + `export_household` (JSON) tools and web buttons *(tools done + tested; demo household protected via `PROTECTED_HOUSEHOLDS`; web buttons are Builder 2's)* — Done when: tests confirm zero items remain after delete; export validates against contracts
-- [~] `eval/requests.yaml`: 40 human-written household requests with expected tool + args; `eval/run_eval.ts` scores an LLM MCP client against the tools → `eval/RESULTS.md` — Done when: reproducible with `npm run eval` *(runner done: `npm --prefix apps/server run eval`, format in `eval/requests.json` with 3 examples. Waiting on: humans write the 40 requests; Bedrock Anthropic use-case form)*
+- [~] `eval/requests.yaml`: 40 human-written household requests with expected tool + args; `eval/run_eval.ts` scores an LLM MCP client against the tools → `eval/RESULTS.md` — Done when: reproducible with `npm run eval` *(runner done: `npm --prefix apps/server run eval`, format in `eval/requests.json` with 3 examples. 40 requests written by the agent at the user's request (2026-10-11), labelled as such; waiting on the Bedrock Anthropic use-case form to run)*
 - [x] Latency report `eval/latency.md` (p50/p95 per tool from 200 replayed calls) — Done when: all tools p95 <500 ms (target <200)
 - [ ] Gate: lint, typecheck, full test suite pass
 
@@ -287,6 +287,8 @@ claude "Read PLAN.md and PROJECT.md. Without building anything new, test everyth
 ---
 
 ## Notes & Decisions
+
+- 2026-10-11 — User asked the agent to write the 40 eval requests (plan had said humans). Mitigations: casual/indirect phrasing that avoids tool-description wording, authorship recorded in `eval/requests.json` and printed in RESULTS.md, README calls the score optimistic.
 
 - 2026-10-11 — M2 server tools done (19 tools, one registry → MCP + REST + future sim agent). Live journey: p50 ~95 ms, warm first call 467 ms; EventBridge warm-up every 5 min. `set_chores` folded into seed data (chores are seeded; editing them is a web-app task). E2E lives in `apps/server/src/demo-journey.test.ts` (in CI) plus `npm --prefix apps/server run journey -- <url>` for the live stack.
 - 2026-10-11 — Bedrock in Lambda fails with "Model use case details have not been submitted": the Anthropic use-case form must be filled in by the account owner. Until then the deterministic planner runs (verified safe).

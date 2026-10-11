@@ -1,8 +1,52 @@
 {
-  "_readme": "Tool-selection eval set. HUMANS write these (not the coding agent) so the eval isn't tuned to the tool descriptions. Target: 40 realistic things a family would say. 'expect.tool' is the first tool Alexa should call; 'expect.args' are key/value pairs that must appear (case-insensitive substring match on strings, exact on others). The three entries below are format examples; replace or keep them.",
+  "_readme": "Tool-selection eval set: 40 things a family might say. Written by the coding agent at the team's request (2026-10-11), deliberately in casual, indirect phrasing that avoids the tool descriptions' wording. Because the same agent wrote the tool descriptions, treat results as optimistic; human-written additions are welcome (ids h-*). 'expect.tool' is the first tool Alexa should call; 'expect.args' must appear (case-insensitive substring on strings, exact otherwise). 'alt' lists other acceptable first tools.",
+  "author": "agent (Claude Code), reviewed by: (pending)",
   "requests": [
-    { "id": "ex-1", "utterance": "what's for dinner tonight?", "expect": { "tool": "get_plan" } },
-    { "id": "ex-2", "utterance": "Maya is allergic to sesame now", "expect": { "tool": "update_member_preferences", "args": { "member": "maya" } } },
-    { "id": "ex-3", "utterance": "who's doing the dishes?", "expect": { "tool": "whos_on", "args": { "chore": "dish" } } }
+    { "id": "m-01", "utterance": "what are we eating tonight", "expect": { "tool": "get_plan" } },
+    { "id": "m-02", "utterance": "ugh I have no idea what to cook this week, can you sort it out", "expect": { "tool": "plan_week" } },
+    { "id": "m-03", "utterance": "figure out dinners for the week but keep wednesday super quick, we have soccer", "expect": { "tool": "plan_week", "args": { "request": "wednesday" } } },
+    { "id": "m-04", "utterance": "what's the plan for friday", "expect": { "tool": "get_plan", "args": { "day": "fri" } } },
+    { "id": "m-05", "utterance": "read me the whole week", "expect": { "tool": "get_plan", "args": { "day": "week" } } },
+    { "id": "m-06", "utterance": "can we do the dal on thursday instead", "expect": { "tool": "set_dinner", "args": { "day": "thu", "recipe": "dal" } } },
+    { "id": "m-07", "utterance": "put peanut noodles on saturday", "expect": { "tool": "set_dinner", "args": { "day": "sat", "recipe": "peanut" } } },
+    { "id": "m-08", "utterance": "what are we having tomorrow night?", "expect": { "tool": "get_plan", "args": { "day": "tomorrow" } } },
+
+    { "id": "h-01", "utterance": "heads up, Maya can't have sesame anymore, the doctor said so", "expect": { "tool": "update_member_preferences", "args": { "member": "maya", "addAllergies": "sesame" } } },
+    { "id": "h-02", "utterance": "Arjun's gone vegetarian", "expect": { "tool": "update_member_preferences", "args": { "member": "arjun", "addDiets": "vegetarian" } } },
+    { "id": "h-03", "utterance": "Priya hates olives, don't give her olives", "expect": { "tool": "update_member_preferences", "args": { "member": "priya", "addDislikes": "olive" } } },
+    { "id": "h-04", "utterance": "who's allergic to what in this house again?", "expect": { "tool": "get_household" } },
+    { "id": "h-05", "utterance": "what do you know about our family", "expect": { "tool": "get_household" } },
+    { "id": "h-06", "utterance": "good news, Maya grew out of her peanut allergy", "expect": { "tool": "update_member_preferences", "args": { "member": "maya", "removeAllergies": "peanut" } } },
+
+    { "id": "c-01", "utterance": "whose turn is it to do the dishes", "expect": { "tool": "whos_on", "args": { "chore": "dish" } } },
+    { "id": "c-02", "utterance": "make a chore chart for the week, and make it fair this time", "expect": { "tool": "assign_chores" } },
+    { "id": "c-03", "utterance": "what does Maya have to do today", "expect": { "tool": "whos_on", "args": { "member": "maya" } } },
+    { "id": "c-04", "utterance": "trash is out", "expect": { "tool": "mark_chore_done", "args": { "chore": "trash" } } },
+    { "id": "c-05", "utterance": "I feel like I'm doing all the housework, is that true?", "expect": { "tool": "chore_balance" } },
+    { "id": "c-06", "utterance": "who's cooking on saturday", "expect": { "tool": "whos_on", "args": { "chore": "cook", "day": "sat" } } },
+    { "id": "c-07", "utterance": "dishes done!", "expect": { "tool": "mark_chore_done", "args": { "chore": "dish" } } },
+    { "id": "c-08", "utterance": "redo the rota, Arjun's travelling", "expect": { "tool": "assign_chores" } },
+
+    { "id": "k-01", "utterance": "ok let's make dinner", "expect": { "tool": "start_cooking" } },
+    { "id": "k-02", "utterance": "walk me through the chana masala", "expect": { "tool": "start_cooking", "args": { "recipe": "chana" } } },
+    { "id": "k-03", "utterance": "done, what now", "expect": { "tool": "next_step" } },
+    { "id": "k-04", "utterance": "wait, go back one", "expect": { "tool": "previous_step" } },
+    { "id": "k-05", "utterance": "sorry, say that again?", "expect": { "tool": "repeat_step" } },
+    { "id": "k-06", "utterance": "set a timer for twelve minutes", "expect": { "tool": "start_timer", "args": { "minutes": 12 } } },
+    { "id": "k-07", "utterance": "start the timer for this step", "expect": { "tool": "start_timer" } },
+    { "id": "k-08", "utterance": "next", "expect": { "tool": "next_step" } },
+
+    { "id": "s-01", "utterance": "what do I need to grab at the store", "expect": { "tool": "shopping_list" } },
+    { "id": "s-02", "utterance": "we're out of milk, add it to the list", "expect": { "tool": "add_to_list", "args": { "items": "milk" } }, "alt": ["remove_pantry_items"] },
+    { "id": "s-03", "utterance": "got the cilantro and the eggs", "expect": { "tool": "check_off", "args": { "items": "cilantro" } } },
+    { "id": "s-04", "utterance": "toss bananas on the grocery list", "expect": { "tool": "add_to_list", "args": { "items": "banana" } } },
+
+    { "id": "p-01", "utterance": "do we have any rice left", "expect": { "tool": "list_pantry", "args": { "ingredient": "rice" } } },
+    { "id": "p-02", "utterance": "I just bought chicken thighs and yogurt", "expect": { "tool": "add_pantry_items", "args": { "items": "chicken" } }, "alt": ["check_off"] },
+    { "id": "p-03", "utterance": "used up the last of the lentils", "expect": { "tool": "remove_pantry_items", "args": { "items": "lentil" } } },
+    { "id": "p-04", "utterance": "what's in the pantry", "expect": { "tool": "list_pantry" } },
+
+    { "id": "d-01", "utterance": "can I get a copy of all my homebase data", "expect": { "tool": "export_household" } },
+    { "id": "d-02", "utterance": "delete everything homebase knows about us", "expect": { "tool": "delete_household_data", "args": { "confirm": false } }, "alt": ["(none)"] }
   ]
 }

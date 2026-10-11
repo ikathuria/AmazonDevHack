@@ -55,7 +55,7 @@ MCP tools never call an LLM; they read and write DynamoDB and return in about 10
 
 - `npm test` runs 73 tests: contracts, allergen verifier, chore fairness, the full demo journey through a real MCP client, SSE resume, export/delete, and the agent loop.
 - [`eval/latency.md`](eval/latency.md): live per-tool latency.
-- [`eval/RESULTS.md`](eval/RESULTS.md) (pending): tool-selection accuracy on human-written household requests (`npm --prefix apps/server run eval`).
+- [`eval/RESULTS.md`](eval/RESULTS.md) (pending): tool-selection accuracy on 40 casual household requests (agent-written at the team's request; same agent wrote the tool descriptions, so read the score as optimistic) (`npm --prefix apps/server run eval`).
 
 ## Responsible AI
 
@@ -65,7 +65,7 @@ MCP tools never call an LLM; they read and write DynamoDB and return in about 10
 
 ## AI-assisted development
 
-Built by a two-person team with Claude Code. Humans chose the idea, the scope, the safety rules (deterministic allergen checks, a protected demo household, no LLM in the request path) and reviewed each milestone. Claude Code wrote most of the code and tests under those rules (see `CLAUDE.md`). The eval requests in `eval/requests.json` are written by the humans, not the agent.
+Built by a two-person team with Claude Code. Humans chose the idea, the scope, the safety rules (deterministic allergen checks, a protected demo household, no LLM in the request path) and reviewed each milestone. Claude Code wrote most of the code and tests under those rules (see `CLAUDE.md`). The 40 eval requests in `eval/requests.json` were written by Claude Code at the team's request, in deliberately casual phrasing; because it also wrote the tool descriptions, the score may be optimistic.
 
 ## Limitations & what's next
 

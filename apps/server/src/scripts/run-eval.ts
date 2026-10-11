@@ -13,9 +13,16 @@ import { seedHousehold } from "./seed-data.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const EvalFile = z.object({
-  requests: z.array(z.object({ id: z.string(), utterance: z.string(), expect: z.object({ tool: z.string(), args: z.record(z.string(), z.unknown()).optional() }) })),
+  author: z.string().default("unknown"),
+  requests: z.array(z.object({
+    id: z.string(),
+    utterance: z.string(),
+    expect: z.object({ tool: z.string(), args: z.record(z.string(), z.unknown()).optional() }),
+    // Other acceptable first tools; "(none)" means answering without a tool (e.g. asking to confirm) is fine.
+    alt: z.array(z.string()).default([]),
+  })),
 });
-const { requests } = EvalFile.parse(JSON.parse(readFileSync(join(root, "eval/requests.json"), "utf8")));
+const { requests, author } = EvalFile.parse(JSON.parse(readFileSync(join(root, "eval/requests.json"), "utf8")));
 
 const store = new MemoryStore();
 for (const { kind, doc } of seedHousehold.docs) await store.putDoc(seedHousehold.id, kind, doc);
@@ -35,8 +42,11 @@ let toolOk = 0, allOk = 0;
 for (const r of requests) {
   const turn = await runAgentTurn({ utterance: r.utterance, tools: allTools, ctx, model, dryRun: true });
   const first = turn.calls[0];
-  const t = first?.name === r.expect.tool;
-  const a = t && argsMatch(r.expect.args, first.input);
+  const chosen = first?.name ?? "(none)";
+  const exact = chosen === r.expect.tool;
+  const t = exact || r.alt.includes(chosen);
+  // Args are only checked against the expected tool; an accepted alternative counts as fully correct.
+  const a = t && (!exact || argsMatch(r.expect.args, first?.input ?? {}));
   toolOk += t ? 1 : 0;
   allOk += a ? 1 : 0;
   rows.push(`| ${r.id} | ${r.utterance.replaceAll("|", "/")} | \`${r.expect.tool}\` | \`${first?.name ?? "(none)"}\` ${first ? "`" + JSON.stringify(first.input).replaceAll("|", "/") + "`" : ""} | ${t ? "✅" : "❌"} | ${a ? "✅" : "❌"} |`);
@@ -46,7 +56,7 @@ for (const r of requests) {
 const md = `# Tool-selection eval results
 
 Run ${new Date().toISOString()} · model \`${process.env.BEDROCK_MODEL_ID ?? "us.anthropic.claude-haiku-4-5-20251001-v1:0"}\` acting as the Alexa+ client · ${allTools.length} Homebase tools · dry run (write tools not executed).
-Reproduce: \`npm --prefix apps/server run eval\`. Requests: [\`eval/requests.json\`](requests.json) (human-written).
+Reproduce: \`npm --prefix apps/server run eval\`. Requests: [\`eval/requests.json\`](requests.json) · written by: ${author}.
 
 **Right tool: ${toolOk}/${requests.length}. Right tool and arguments: ${allOk}/${requests.length}.**
 
