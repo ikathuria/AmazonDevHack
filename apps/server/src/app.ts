@@ -11,6 +11,8 @@ import { docs } from "./lib/docs.js";
 import { allTools } from "./features/index.js";
 import { runAgentTurn, type ChatModel } from "./lib/agent.js";
 import { SIM_PAGE } from "./sim-page.js";
+import { PRIVACY_PAGE, TERMS_PAGE } from "./legal-pages.js";
+import { ADDON_MEDIA } from "./addon-media.js";
 import type { Message } from "@aws-sdk/client-bedrock-runtime";
 
 export type AppOptions = {
@@ -36,6 +38,15 @@ export function createApp({ store, queue, demoHouseholdId, now = () => new Date(
   app.use("/households/*", cors());
 
   app.get("/health", (c) => c.json({ ok: true, service: "homebase" }));
+
+  // Pages and images referenced by the Alexa+ add-on listing (addon/addon-package/addon.json).
+  app.get("/privacy", (c) => c.html(PRIVACY_PAGE));
+  app.get("/terms", (c) => c.html(TERMS_PAGE));
+  app.get("/media/:name", (c) => {
+    const b64 = ADDON_MEDIA[c.req.param("name")];
+    if (!b64) return c.notFound();
+    return c.body(Buffer.from(b64, "base64"), 200, { "content-type": "image/png", "cache-control": "public, max-age=86400" });
+  });
 
   // Stateless Streamable HTTP: fresh server + transport per request (Lambda-friendly).
   app.all("/mcp", async (c) => {

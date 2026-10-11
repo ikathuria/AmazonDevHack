@@ -1,0 +1,34 @@
+{
+  "manifestVersion": "1.0",
+  "storeListing": {
+    "distributionCountries": ["US"],
+    "locales": {
+      "en-US": {
+        "name": { "value": "Homebase" },
+        "shortDescription": { "value": "Your family's memory: plans dinners around allergies, splits chores fairly, and cooks along with you on your TV." },
+        "fullDescription": { "value": "Homebase remembers your household: who lives there, allergies and diets, the pantry and the chore rota. Ask it to plan the week's dinners and it checks every recipe against everyone's allergies and house rules like vegetarian Tuesdays. It splits chores fairly by effort, tells you who's on dishes tonight, walks you through recipes step by step with timers, and builds your shopping list from what you don't already have. Everything also shows on the Homebase family board on your Fire TV. Not medical advice: always check ingredient labels." },
+        "examplePhrases": [
+          { "value": "Alexa, ask Homebase to plan dinners this week" },
+          { "value": "Alexa, ask Homebase who's on dishes tonight" },
+          { "value": "Alexa, ask Homebase to start cooking tonight's dinner" },
+          { "value": "Alexa, ask Homebase what we need to buy" }
+        ]
+      }
+    }
+  },
+  "privacyAndCompliance": {
+    "privacyPolicyUrl": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/privacy",
+    "termsOfUseUrl": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/terms"
+  },
+  "mediaAssets": {
+    "icons": {
+      "light": { "72x72": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-light-72.png", "64x64": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-light-64.png", "88x88": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-light-88.png", "126x126": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-light-126.png", "180x180": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-light-180.png", "241x241": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-light-241.png" },
+      "dark": { "72x72": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-dark-72.png", "64x64": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-dark-64.png", "88x88": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-dark-88.png", "126x126": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-dark-126.png", "180x180": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-dark-180.png", "241x241": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/icon-dark-241.png" }
+    },
+    "carouselImages": [{ "uri": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/carousel-1.png", "altText": "Homebase: your family's memory for allergies, chores, dinners and pantry, cooking along on your TV." }],
+    "bannerImages": [{ "uri": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/media/banner.png" }]
+  },
+  "integrations": [
+    { "type": "MCP", "config": { "endpoints": { "default": { "type": "HTTPS", "uri": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/mcp" } } } }
+  ]
+}
