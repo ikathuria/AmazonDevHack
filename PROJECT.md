@@ -21,9 +21,9 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 | Visual cards | @modelcontextprotocol/ext-apps | 2.0.3 | Echo Show / mobile |
 | TV | React Native for Vega | per Vega SDK | subscribes via SSE |
 | Web | Vite + React SPA | latest at M1 | setup, login, browser board, export |
-| Contracts | TypeScript + zod | 7.0.2 / 4.6.5 | `packages/contracts` |
+| Contracts | TypeScript + zod | 6.0.3 / 4.6.5 | `packages/contracts` (TS 6: typescript-eslint lacks TS 7 support) |
 | Database | DynamoDB on-demand, single table | — | |
-| AI | Bedrock Claude Haiku 5.5 (async worker via SQS) | — | never in the request path |
+| AI | Bedrock Claude Haiku 4.5 (`us.` inference profile; 5.5 not enabled) via SQS worker | — | never in the request path |
 | Auth | Cognito (OAuth 2.1 + PKCE account linking) | — | |
 | IaC | AWS CDK | 2.273.0 | |
 | Tests | Vitest / Playwright / eval harness | 5.0.3 / 1.64.0 | |
@@ -76,8 +76,8 @@ docs/             # numbered kebab-case docs
 
 | Milestone | Status | Notes |
 |---|---|---|
-| 0. Spike | ◐ in progress | MCP+SSE spike works locally + via tunnel (p95 131 ms); blocked on human setup: AWS, `alexa-ai` CLI access, Vega SDK |
-| 1. Scaffold | ☐ | |
+| 0. Spike | ◐ | MCP+SSE proven locally, via tunnel and on Lambda. Alexa+ deploy blocked on account allowlisting → simulated Alexa+ path is the demo fallback |
+| 1. Scaffold | ◐ | server/contracts/infra/CI done and deployed (us-east-1). Remaining: `apps/tv`, `apps/web` (Builder 2), BRAND.md gate |
 | 2. Core feature | ☐ | |
 | 3. Data + evidence | ☐ | |
 | 4. UI/UX | ☐ | hackathon freeze Mon Oct 19 22:00 CT |
@@ -85,12 +85,15 @@ docs/             # numbered kebab-case docs
 | 6. Pilot & retention gate | ☐ | Oct 26 – Nov 22 |
 | 7–9. Certify / Monetize / Polish | ☐ | gated on M6 |
 
-**In progress now:** M0. Spike server done (see docs/01-platform-notes.md); waiting on human setup.
+**In progress now:** M2 tools (household, pantry, meals + allergen verifier, chores, cook, shopping).
+**Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws` (MCP at `/mcp`, TV feed at `/households/patels/events`). Redeploy: `npm run deploy`; reseed: `TABLE_NAME=<CDK output> npm run seed`.
 **Next up:** M0 human setup (AWS, `alexa-ai configure`, Vega SDK, Fire TV dev mode).
 
 ---
 
 ## Decision log
+
+- 2026-10-11 — Alexa+ CLI access blocked (allowlist); simulated Alexa+ path is the demo fallback. Haiku 4.5 on Bedrock. TS 6.0.3. SSE polls DynamoDB at 1 s.
 
 - 2026-10-08 — Idea: A+D mix (cook-along + household chores/meal agent). Tracks: Alexa+ (primary) + Fire TV; mini: AWS Builder.
 - 2026-10-08 — Research verdict weekend-prototype-first; user chose full product plan with a retention gate.

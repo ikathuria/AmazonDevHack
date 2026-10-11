@@ -162,12 +162,12 @@ Tasks:
 **Goal:** the monorepo builds, deploys with one command, and CI is green.
 
 Tasks:
-- [ ] Create `apps/server`, `apps/tv`, `apps/web`, `packages/contracts`, `infra`, `eval`, `addon`, `docs` per Project Structure; root delegating `package.json`; MIT LICENSE — Done when: `npm run build` builds all three apps
-- [ ] `packages/contracts`: zod schemas for Household, Member (name, role, allergies[], diets[], dislikes[]), PantryItem, Recipe (ingredients with allergen tags, steps with timerSec), MealPlan, Chore, ChoreAssignment, CookSession, ShoppingItem; tool input/output schemas; SSE event union — Done when: `vitest run packages/contracts` round-trips valid/invalid fixtures
-- [ ] Lint (ESLint) + typecheck + Vitest in every package; one passing test each — Done when: `npm run lint && npm run typecheck && npm test` green
-- [ ] `infra/` CDK stack: DynamoDB table (pk/sk + GSI1), server Lambda + Function URL (streaming), worker Lambda + SQS queue, S3+CloudFront for web, Cognito user pool + app client + domain — Done when: `npx cdk deploy` from clean checkout outputs URLs; `/health` returns 200
-- [ ] GitHub Actions: install, lint, typecheck, test, `cdk synth` — Done when: the workflow passes on push
-- [ ] Seed script `apps/server/scripts/seed.ts`: demo household "The Patels" (2 adults, 1 child, peanut allergy, vegetarian Tuesdays, 20 pantry items, 12 verified recipes) — Done when: `npm run seed` is idempotent (running twice → same item count)
+- [x] Create `apps/server`, `apps/tv`, `apps/web`, `packages/contracts`, `infra`, `eval`, `addon`, `docs` per Project Structure; root delegating `package.json`; MIT LICENSE *(server/contracts/infra done 2026-10-11; `apps/tv` + `apps/web` are Builder 2's to create)* — Done when: `npm run build` builds all three apps
+- [x] `packages/contracts`: zod schemas for Household, Member (name, role, allergies[], diets[], dislikes[]), PantryItem, Recipe (ingredients with allergen tags, steps with timerSec), MealPlan, Chore, ChoreAssignment, CookSession, ShoppingItem; tool input/output schemas; SSE event union — Done when: `vitest run packages/contracts` round-trips valid/invalid fixtures
+- [x] Lint (ESLint) + typecheck + Vitest in every package; one passing test each — Done when: `npm run lint && npm run typecheck && npm test` green
+- [x] `infra/` CDK stack: DynamoDB table (pk/sk + GSI1), server Lambda + Function URL (streaming), worker Lambda + SQS queue, S3+CloudFront for web, Cognito user pool + app client + domain — Done when: `npx cdk deploy` from clean checkout outputs URLs; `/health` returns 200 *(2026-10-11: table + server + worker + queue deployed, /health 200, live MCP p95 108 ms, SSE delivery 0.26 s. Cognito moved to M5 and S3/CloudFront to M4, when they're first needed; no GSI needed yet)*
+- [x] GitHub Actions: install, lint, typecheck, test, `cdk synth` — Done when: the workflow passes on push
+- [x] Seed script `apps/server/scripts/seed.ts`: demo household "The Patels" (2 adults, 1 child, peanut allergy, vegetarian Tuesdays, 20 pantry items, 12 verified recipes) — Done when: `npm run seed` is idempotent (running twice → same item count)
 - [ ] Update PROJECT.md, CLAUDE.md, `.env.example` — Done when: committed
 - [ ] **Brand & UI (human gate):** run the `brand-studio` skill: 3–5 directions for a 10-foot TV UI + web, user picks, writes `BRAND.md` + tokens in `packages/contracts/tokens` (or `apps/*/src/theme`) — Done when: `BRAND.md` + token files exist and both humans approve
 - [ ] Gate: lint, typecheck, full test suite pass
@@ -280,6 +280,11 @@ claude "Read PLAN.md and PROJECT.md. Without building anything new, test everyth
 ---
 
 ## Notes & Decisions
+
+- 2026-10-11 — Alexa AI CLI blocked: AssumeRole into Amazon's role denied (account not allowlisted). Asked organizers. Per the M0 go/no-go, the **simulated Alexa+ web voice layer is the demo path** until access arrives; the same MCP server serves both.
+- 2026-10-11 — Bedrock: Haiku 5.5 not enabled on the account, so default is `us.anthropic.claude-haiku-4-5-20251001-v1:0` (≈$0.013/plan), configurable via CDK context `bedrockModelId`.
+- 2026-10-11 — TypeScript pinned to 6.0.3 (typescript-eslint doesn't support TS 7 yet).
+- 2026-10-11 — SSE polls DynamoDB every 1 s (Lambda invocations share no memory); streams close after 10 min and clients resume with Last-Event-ID or `?after=`.
 
 - 2026-10-08 — Research verdict was **weekend-prototype-first**. The user chose **full product plan anyway**. Mitigation: a retention gate (M6) before monetization.
 - 2026-10-08 — Renamed Hearth → **Homebase** (Hearth Display collision).
