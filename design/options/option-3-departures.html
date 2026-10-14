@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Option 3 · Departure Board</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&family=Archivo:wght@500;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0E0F0C;--row:#1A1B17;--amber:#FFB84D;--paper:#ECE6D8;--dim:#7C7A70;--red:#FF4A3D;--green:#5BD18B}
+html,body{margin:0;background:#000;overflow:hidden;height:100%}
+.stage{width:1920px;height:1080px;transform-origin:0 0;background:var(--bg);color:var(--paper);font-family:Archivo;padding:64px 88px;box-sizing:border-box;position:relative}
+.top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid var(--amber);padding-bottom:20px}
+.top h1{font-weight:900;font-size:64px;margin:0;letter-spacing:2px}
+.clock{font-family:'JetBrains Mono';font-size:64px;color:var(--amber);font-weight:800}
+table{width:100%;border-collapse:separate;border-spacing:0 10px;margin-top:24px;font-family:'JetBrains Mono';font-size:40px}
+th{text-align:left;font-size:22px;color:var(--dim);letter-spacing:4px;font-weight:500}
+td{background:var(--row);padding:18px 24px}
+.flap{display:inline-block;background:#24251F;border-bottom:2px solid #000;padding:0 6px;margin-right:3px}
+.now td{background:var(--amber);color:var(--bg);font-weight:800}
+.cancel td{color:var(--dim)} .cancel .st{color:var(--red);font-weight:800}
+.ok{color:var(--green)}
+.ticker{position:absolute;left:0;right:0;bottom:0;background:var(--red);color:var(--bg);font-family:'JetBrains Mono';font-weight:800;font-size:36px;padding:24px 88px}
+.dish{position:absolute;right:88px;bottom:130px;text-align:right}
+.dish .who{font-size:120px;font-weight:900;line-height:1;color:var(--amber)}
+</style></head><body><div class="stage">
+<div class="top"><h1>PATEL HOUSE · DINNER DEPARTURES</h1><div class="clock">18:47 THU</div></div>
+<table><tr><th>DAY</th><th>DINNER</th><th>STATUS</th></tr>
+<tr class="cancel"><td>THU</td><td>PEANUT SATAY NOODLES</td><td class="st">CANCELLED · ALLERGY</td></tr>
+<tr class="now"><td>THU</td><td><span>GARLIC SPINACH PASTA</span></td><td>NOW COOKING · STEP 1/6</td></tr>
+<tr><td>FRI</td><td>SOY-GLAZED SALMON + RICE</td><td class="ok">ON TIME</td></tr>
+<tr><td>SAT</td><td>CHANA MASALA</td><td class="ok">ON TIME</td></tr>
+<tr><td>SUN</td><td>RED LENTIL SOUP</td><td class="ok">ON TIME</td></tr></table>
+<div class="dish"><div style="font-family:'JetBrains Mono';font-size:26px;color:var(--dim);letter-spacing:4px">DISHES · GATE SINK</div><div class="who">ARJUN</div></div>
+<div class="ticker">⚠ ALEXA SAID NO: MAYA · PEANUT ALLERGY → REROUTED TO PASTA &nbsp;&nbsp;·&nbsp;&nbsp; RICE: OUT → ADDED TO LIST</div>
+</div><script src="stage.js"></script></body></html>

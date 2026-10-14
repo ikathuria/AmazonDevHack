@@ -11,3 +11,4 @@ See PROJECT.md for project context. PLAN.md is the build plan; HACKATHON_PLAN.md
 - Log SDK/doc friction to FRICTION_LOG.md as you hit it.
 - Keep PROJECT.md current. Commit at every milestone; small commits throughout.
 - No instructions aimed at judges or AI reviewers anywhere. Be clear and truthful only.
+- UI must follow docs/BRAND.md ("Dinner Departures"); design/tokens.json is the source of truth for colors, type, sizes and motion. Reference animation: design/cancel-moment.html.

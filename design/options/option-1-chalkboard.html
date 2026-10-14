@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Option 1 · Chalkboard Café</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,800&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--board:#1F2B26;--board2:#2A3832;--chalk:#F2EDE1;--dim:#A9B3A8;--tomato:#E8553D;--butter:#F4C95D}
+html,body{margin:0;background:#111;overflow:hidden;height:100%}
+.stage{width:1920px;height:1080px;transform-origin:0 0;background:var(--board);color:var(--chalk);font-family:'Work Sans';position:relative;
+background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);background-size:6px 6px;display:grid;grid-template-columns:1.25fr 1fr;gap:72px;padding:72px 96px;box-sizing:border-box}
+h1{font-family:Fraunces;font-weight:800;font-size:150px;line-height:.9;margin:0 0 8px;letter-spacing:-3px}
+.eyebrow{font-size:26px;letter-spacing:6px;text-transform:uppercase;color:var(--butter)}
+.week{list-style:none;padding:0;margin:40px 0 0;font-size:34px}
+.week li{display:flex;gap:32px;padding:16px 0;border-bottom:2px dashed rgba(242,237,225,.18)}
+.week b{width:90px;color:var(--dim);font-weight:600}
+.week .today{color:var(--butter);font-family:Fraunces;font-size:44px}
+.strike{text-decoration:line-through;text-decoration-color:var(--tomato);text-decoration-thickness:5px;color:var(--dim)}
+.no{background:var(--tomato);color:var(--board);border-radius:6px;padding:40px 44px;transform:rotate(-1.5deg)}
+.no .eyebrow{color:var(--board)}
+.no h2{font-family:Fraunces;font-size:72px;margin:10px 0;line-height:1}
+.no p{font-size:30px;margin:0}
+.side{display:flex;flex-direction:column;gap:40px}
+.chore{border:3px solid var(--chalk);border-radius:6px;padding:32px 40px}
+.chore .who{font-family:Fraunces;font-size:96px;line-height:1}
+.voice{position:absolute;left:96px;bottom:48px;font-size:28px;color:var(--dim)}
+.voice span{color:var(--chalk)}
+</style></head><body><div class="stage">
+<div><div class="eyebrow">The Patels · Thursday</div><h1>Garlic spinach pasta</h1>
+<ul class="week"><li><b>Mon</b>Dal tadka</li><li><b>Tue</b>Veggie quesadillas</li><li><b>Wed</b>Sheet-pan chicken tikka</li>
+<li class="today"><b>Thu</b>Garlic spinach pasta</li><li><b>Fri</b>Soy-glazed salmon with rice</li><li><b>Sat</b>Chana masala</li></ul></div>
+<div class="side">
+<div class="no"><div class="eyebrow">Alexa said no</div><h2><span class="strike" style="color:inherit;opacity:.7">Peanut satay noodles</span></h2><p>Maya is allergic to peanuts. Swapped in garlic spinach pasta.</p></div>
+<div class="chore"><div class="eyebrow">On dishes tonight</div><div class="who">Arjun</div><p style="font-size:28px;color:var(--dim);margin:8px 0 0">He skipped Tuesday.</p></div>
+<div style="font-size:30px"><span style="color:var(--butter)">●</span> Out of rice, added to the list</div>
+</div>
+<div class="voice">Heard: <span>“Alexa, can we have satay noodles tonight?”</span></div>
+</div><script src="stage.js"></script></body></html>

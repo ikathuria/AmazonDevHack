@@ -1,0 +1,93 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Cancel Moment</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&family=Archivo:wght@500;900&display=swap" rel="stylesheet">
+<!-- Reference animation for the TV board's allergen cancel. Values mirror design/tokens.json. Press R or click to replay. -->
+<style>
+:root{--bg:#0E0F0C;--row:#1A1B17;--flap:#24251F;--paper:#ECE6D8;--dim:#8E8B80;--amber:#FFB84D;--red:#FF4A3D;--green:#5BD18B;--on:#0E0F0C;--ease:cubic-bezier(.2,.8,.2,1)}
+html,body{margin:0;background:#000;overflow:hidden;height:100%}
+.stage{width:1920px;height:1080px;transform-origin:0 0;background:var(--bg);color:var(--paper);font-family:Archivo;padding:64px 88px;box-sizing:border-box;position:relative;overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid var(--amber);padding-bottom:20px}
+.top h1{font-weight:900;font-size:64px;margin:0;letter-spacing:2px}
+.clock{font-family:'JetBrains Mono';font-size:64px;color:var(--amber);font-weight:800}
+.heads,.r{display:grid;grid-template-columns:160px 1fr 640px;font-family:'JetBrains Mono'}
+.heads{font-size:22px;color:var(--dim);letter-spacing:4px;margin:24px 0 0;padding:0 24px}
+.board{margin-top:10px;display:flex;flex-direction:column;gap:10px}
+.r{background:var(--row);font-size:40px;padding:18px 24px;transition:background .28s var(--ease),color .28s var(--ease),opacity .28s}
+.r.now{background:var(--amber);color:var(--on);font-weight:800}
+.r.cancelled{color:var(--dim)} .r.cancelled .st{color:var(--red);font-weight:800}
+.r .din{transition:color .28s} .r.cancelled .din{text-decoration:line-through 4px var(--red)}
+.ok{color:var(--green)}
+.slot{overflow:hidden;max-height:0;transition:max-height .28s var(--ease)}
+.slot.open{max-height:120px}
+.slot .r{transform:translateY(-100%);transition:transform .28s var(--ease),background .28s}
+.slot.open .r{transform:none}
+.ch{display:inline-block;min-width:.62em;text-align:center}
+.ch.flip{animation:flip 70ms linear}
+@keyframes flip{0%{transform:scaleY(1)}50%{transform:scaleY(0);background:var(--flap)}100%{transform:scaleY(1)}}
+.voice{position:absolute;left:88px;bottom:150px;font-size:36px;color:var(--dim);opacity:0;transition:opacity .4s}
+.voice.on{opacity:1} .voice b{color:var(--paper);font-weight:500}
+.dish{position:absolute;right:88px;bottom:150px;text-align:right}
+.dish .who{font-size:120px;font-weight:900;line-height:1;color:var(--amber)}
+.ticker{position:absolute;left:0;right:0;bottom:0;height:90px;background:var(--red);color:var(--on);font-family:'JetBrains Mono';font-weight:800;font-size:36px;transform:translateY(100%);transition:transform .28s var(--ease);overflow:hidden;white-space:nowrap}
+.ticker.on{transform:none}
+.ticker span{position:absolute;top:24px;left:100%}
+.ticker.on span{animation:scroll 16s linear forwards}
+@keyframes scroll{to{transform:translateX(calc(-100% - 2000px))}}
+.hint{position:fixed;right:12px;bottom:10px;font:12px system-ui;color:#666}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="stage" id="s">
+<div class="top"><h1>PATEL HOUSE · DINNER DEPARTURES</h1><div class="clock">18:47 THU</div></div>
+<div class="heads"><div>DAY</div><div>DINNER</div><div>STATUS</div></div>
+<div class="board">
+<div class="r now" id="thu"><div>THU</div><div class="din">PEANUT SATAY NOODLES</div><div class="st" id="st">BOARDING · 18:50</div></div>
+<div class="slot" id="slot"><div class="r" id="new"><div>THU</div><div id="newdin">                    </div><div id="newst">                      </div></div></div>
+<div class="r"><div>FRI</div><div>SOY-GLAZED SALMON + RICE</div><div class="ok">ON TIME</div></div>
+<div class="r"><div>SAT</div><div>CHANA MASALA</div><div class="ok">ON TIME</div></div>
+<div class="r"><div>SUN</div><div>RED LENTIL SOUP</div><div class="ok">ON TIME</div></div>
+</div>
+<div class="voice" id="v">Heard: <b>“Alexa, can we have satay noodles tonight?”</b></div>
+<div class="dish"><div style="font-family:'JetBrains Mono';font-size:26px;color:var(--dim);letter-spacing:4px">DISHES · GATE SINK</div><div class="who">ARJUN</div></div>
+<div class="ticker" id="t"><span>⚠ ALEXA SAID NO · MAYA HAS A PEANUT ALLERGY · PEANUT SATAY NOODLES CANCELLED → REROUTED TO GARLIC SPINACH PASTA · NO PEANUTS IN TONIGHT’S PANTRY LIST</span></div>
+</div>
+<div class="hint">R / click to replay</div>
+<script>
+const $=id=>document.getElementById(id), wait=ms=>new Promise(r=>setTimeout(r,ms));
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fit(){const k=Math.min(innerWidth/1920,innerHeight/1080);$('s').style.transform=`scale(${k})`}
+addEventListener('resize',fit);fit();
+// Split-flap: each character flips in sequence to its new value (flapMs 70, stagger 25).
+async function flap(el,text){
+  const len=Math.max(text.length,el.textContent.length);
+  el.innerHTML=[...el.textContent.padEnd(len)].map(c=>`<span class="ch">${c===' '?'&nbsp;':c}</span>`).join('');
+  const chs=[...el.children];
+  await Promise.all(chs.map((c,i)=>new Promise(async res=>{
+    if(!reduce)await wait(i*25);
+    c.classList.remove('flip');void c.offsetWidth;c.classList.add('flip');
+    setTimeout(()=>{c.innerHTML=(text[i]&&text[i]!==' ')?text[i]:'&nbsp;'},reduce?0:35);
+    setTimeout(res,reduce?0:70);
+  })));
+}
+let run=0;
+async function play(){
+  const me=++run, ok=()=>me===run;
+  // reset
+  $('thu').className='r now';$('st').textContent='BOARDING · 18:50';
+  $('slot').className='slot';$('new').className='r';$('newdin').textContent='';$('newst').textContent='';
+  $('v').className='voice';$('t').className='ticker';
+  await wait(1200);if(!ok())return;
+  $('v').classList.add('on');               // 1. request heard
+  await wait(1800);if(!ok())return;
+  $('thu').className='r cancelled';         // 2. row dims, status flips red
+  await flap($('st'),'CANCELLED · ALLERGY');if(!ok())return;
+  $('t').classList.add('on');               // 3. ticker explains why
+  await wait(600);if(!ok())return;
+  $('slot').classList.add('open');          // 4. safe dinner slides in, lit amber
+  await wait(300);$('new').classList.add('now');
+  await flap($('newdin'),'GARLIC SPINACH PASTA');if(!ok())return;
+  await flap($('newst'),'NOW BOARDING · 18:50');
+}
+addEventListener('keydown',e=>{if(e.key.toLowerCase()==='r')play()});
+addEventListener('click',play);
+document.fonts.ready.then(play);
+</script></body></html>
