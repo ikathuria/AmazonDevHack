@@ -36,6 +36,7 @@ export const mealTools = [
       const [h, plan] = await Promise.all([d.household(), d.plan()]);
       if (!h) return notSetUp;
       if (!plan || plan.status === "failed") return { text: "There's no meal plan yet. Say 'plan dinners this week' and I'll make one." };
+      if (plan.weekOf !== weekOf(ctx.now(), h.timezone)) return { text: "I only have last week's plan. Say 'plan dinners this week' and I'll make a new one.", data: { stale: true } };
       if (plan.status === "drafting") return { text: "I'm still drafting the plan. Give me a few more seconds." };
       if (day?.toLowerCase() === "week") return { text: speakPlan(plan), data: { plan } };
       const wd = parseDay(day, ctx.now(), h.timezone);
@@ -57,7 +58,7 @@ export const mealTools = [
       const wd = parseDay(a.day, ctx.now(), h.timezone);
       const v = verifyRecipe(r, h, wd);
       if (!v.ok) return { text: `I can't put ${r.title} on ${DAY_NAMES[wd]}: ${v.reasons[0]}. Want me to suggest something else?`, data: { blocked: v.reasons } };
-      const plan = existing && existing.status === "ready" ? existing : MealPlan.parse({ weekOf: weekOf(ctx.now(), h.timezone), status: "ready" });
+      const plan = existing && existing.status === "ready" && existing.weekOf === weekOf(ctx.now(), h.timezone) ? existing : MealPlan.parse({ weekOf: weekOf(ctx.now(), h.timezone), status: "ready" });
       plan.days[wd] = { recipeId: r.id, title: r.title };
       await d.savePlan(plan);
       await d.emit({ type: "plan.updated", plan });

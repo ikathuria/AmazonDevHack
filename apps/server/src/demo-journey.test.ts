@@ -100,6 +100,14 @@ describe("demo journey", () => {
     await client.close();
   });
 
+  it("doesn't read last week's plan as this week's", async () => {
+    const { store, call, client } = await setup();
+    await store.putDoc("patels", "PLAN", { weekOf: "2026-10-05", status: "ready", days: { thu: { recipeId: "dal-tadka", title: "Dal tadka" } }, blocked: [] });
+    const r = await call("get_plan", { day: "tonight" });
+    expect(r.text).toContain("last week's plan");
+    await client.close();
+  });
+
   it("remembers preferences across sessions", async () => {
     const { call, client } = await setup();
     await call("update_member_preferences", { member: "Arjun", addDiets: ["vegetarian"] });
