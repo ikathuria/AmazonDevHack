@@ -31,7 +31,7 @@ Dinner in a busy household is a negotiation, not a recipe search. So we made the
 - **Built with Claude Code** by a two-person team (disclosed in the README).
 
 ## Challenges
-- **Alexa AI CLI access:** the CLI installs from a private registry behind an AWS role our account couldn't assume (AccessDenied on `AddOn3PDeveloperToolsRead`). We built the rules' simulated Alexa+ path on the same tools while waiting. TODO: update if access arrived.
+- **Alexa AI CLI access:** the CLI installs from a private registry behind an AWS role our account couldn't assume (AccessDenied on `AddOn3PDeveloperToolsRead`). Support told us MCP Preview access is phased and waitlisted us, so we built the rules' simulated Alexa+ path on the same tools.
 - **Bedrock access:** a use-case form, then a Marketplace payment check, each surfaced as a different error from Lambda than from the CLI. The deterministic planner kept the product working throughout.
 - **Real-time TV updates from serverless:** Lambda instances share no memory, so the event stream polls DynamoDB once a second, with a per-household sequence counter for exactly-once resume.
 
@@ -59,7 +59,7 @@ Draft from what we actually hit, with details in `FRICTION_LOG.md`. **Both of us
 - *Used for:* the Homebase add-on package (`addon/addon-package/addon.json`), target endpoint `/mcp`.
 - *Worked well:* the requirements are concrete (spec version, Streamable HTTP, latency budget, the auth checklist), which let us design for them up front.
 - *Needs work:* the CLI is only on a private CodeArtifact registry behind a role our account couldn't assume, with no self-serve way to register an account. No page says whether dev-stage add-ons need OAuth, or how a tool becomes "user-specific" (Tier 2). There's no Fire TV rendering surface for MCP Apps.
-- *Onboarding:* blocked at install. TODO: update with time-to-hello-world if access arrives.
+- *Onboarding:* blocked at install. Support replied that MCP Preview access is rolled out to partners in phases, and we were waitlisted with no date, so we built the rules' simulated Alexa+ path on our live MCP server.
 - *Build again?* TODO yes/no + why.
 
 **Fire TV / Vega SDK:** TODO (Builder 2): what you used, setup, Virtual Device, sideloading, networking (SSE/fetch), focus management, onboarding time, build again?

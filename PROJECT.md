@@ -98,6 +98,8 @@ spike/                  # M0 spike (historical)
 
 ## Decision log
 
+- 2026-10-14 — Alexa+ MCP Preview access waitlisted (phased rollout, no date). Alexa+ entry = live MCP server + simulated Alexa+. ASK CLI 2.30.7 installed, not yet configured.
+
 - 2026-10-13 — `set_dinner` cancels unsafe dinners and reroutes to a safe one (keeps the day's existing safe dinner if there is one); new additive contract event `plan.rerouted` → **Builder 2 to confirm**. `/board`, `/sim` and add-on art rebuilt in the Dinner Departures brand. `get_plan`/`set_dinner` ignore a previous week's plan.
 - 2026-10-13 — Backstop `/board` added so the demo survives if the Vega app slips (it doesn't count as the Fire TV app).
 - 2026-10-11 — Eval: 40 agent-written requests (user's request, labelled), 37/40. Bedrock needed the Anthropic use-case form and a payment method.

@@ -294,6 +294,8 @@ claude "Read PLAN.md and PROJECT.md. Without building anything new, test everyth
 
 ## Notes & Decisions
 
+- 2026-10-14 — Amazon support: MCP Preview access is phased, waitlisted with no date. **Decision:** the Alexa+ entry = live self-hosted MCP server + simulated Alexa+ (`/sim`), stated honestly. ASK CLI installed (classic skills); a classic skill as an on-device voice front end is under consideration.
+
 - 2026-10-13 — Brand "Dinner Departures" adopted (`docs/BRAND.md`, `design/tokens.json`). `set_dinner` now reroutes instead of only refusing (the brand's hero moment); `plan.rerouted` added to contracts pending Builder 2's OK. Backstop `/board` built. Stale-week plans are no longer read as current.
 
 - 2026-10-11 — Eval run: 37/40 (Haiku 4.5 via Bedrock). Misses are all context-free cook-along commands ("next", "say that again?", "let's make dinner"). Not tuned to pass. A follow-up eval with multi-turn cooking context would measure the real conversation.
