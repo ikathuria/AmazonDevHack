@@ -107,6 +107,14 @@ export const HomebaseEvent = z.discriminatedUnion("type", [
   z.object({ type: z.literal("cook.timer"), endsAt: z.string(), label: z.string() }),
   z.object({ type: z.literal("shopping.updated"), items: z.array(ShoppingItem) }),
   z.object({ type: z.literal("voice.heard"), utterance: z.string().max(200) }),
+  // An unsafe dinner was cancelled and (if possible) replaced. Drives the board's CANCELLED · ALLERGY → REROUTED moment.
+  // Added 2026-10-13 (additive; older clients ignore unknown event types).
+  z.object({
+    type: z.literal("plan.rerouted"),
+    day: Weekday,
+    cancelled: z.object({ title: z.string(), reason: z.string() }),
+    replacement: z.object({ recipeId: z.string(), title: z.string() }).nullable(),
+  }),
 ]);
 export type HomebaseEvent = z.infer<typeof HomebaseEvent>;
 

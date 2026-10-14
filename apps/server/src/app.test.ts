@@ -75,7 +75,7 @@ describe("simulated Alexa+", () => {
     const app = createApp({ store: new MemoryStore(), queue: new MemoryQueue(), demoHouseholdId: "patels" });
     const res = await app.request("/board");
     expect(res.status).toBe(200);
-    expect(await res.text()).toContain("Homebase Family Board");
+    expect(await res.text()).toContain("Dinner Departures");
   });
 
   it("returns 503 when no chat model is configured", async () => {

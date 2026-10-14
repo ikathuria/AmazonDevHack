@@ -5,7 +5,7 @@ import { defineTool } from "../../lib/tools.js";
 import { docs, matchByName, notSetUp } from "../../lib/docs.js";
 import { DAY_NAMES, parseDay, weekOf } from "../../lib/time.js";
 import { verifyRecipe } from "./allergen-verifier.js";
-import { speakPlan } from "./planner.js";
+import { pantryCoverage, speakPlan } from "./planner.js";
 
 export const mealTools = [
   defineTool({
@@ -47,22 +47,46 @@ export const mealTools = [
   defineTool({
     name: "set_dinner",
     title: "Set a day's dinner",
-    description: "Puts a specific recipe on a day of this week's plan, after checking it against everyone's allergies and the day's house rules. Use for 'make Friday peanut noodles' or 'swap Tuesday to dal'.",
+    description: "Puts a specific recipe on a day of this week's plan. If it isn't safe for everyone (allergies, diets, the day's house rules), Homebase cancels it and swaps in a safe recipe instead, and says why. Use for 'make Friday peanut noodles' or 'swap Tuesday to dal'.",
     input: { day: z.string().describe("today, tomorrow or a weekday name"), recipe: z.string().describe("Recipe name as the user said it") },
     handler: async (ctx, a) => {
       const d = docs(ctx);
-      const [h, recipes, existing] = await Promise.all([d.household(), d.recipes(), d.plan()]);
+      const [h, recipes, existing, pantry] = await Promise.all([d.household(), d.recipes(), d.plan(), d.pantry()]);
       if (!h) return notSetUp;
       const r = matchByName(recipes, a.recipe, (x) => x.title);
       if (!r) return { text: `I don't have a recipe called ${a.recipe}. Some options: ${recipes.slice(0, 5).map((x) => x.title).join(", ")}.`, isError: true };
       const wd = parseDay(a.day, ctx.now(), h.timezone);
+      const week = weekOf(ctx.now(), h.timezone);
+      const plan = existing && existing.status === "ready" && existing.weekOf === week ? existing : MealPlan.parse({ weekOf: week, status: "ready" });
       const v = verifyRecipe(r, h, wd);
-      if (!v.ok) return { text: `I can't put ${r.title} on ${DAY_NAMES[wd]}: ${v.reasons[0]}. Want me to suggest something else?`, data: { blocked: v.reasons } };
-      const plan = existing && existing.status === "ready" && existing.weekOf === weekOf(ctx.now(), h.timezone) ? existing : MealPlan.parse({ weekOf: weekOf(ctx.now(), h.timezone), status: "ready" });
-      plan.days[wd] = { recipeId: r.id, title: r.title };
+      if (v.ok) {
+        plan.days[wd] = { recipeId: r.id, title: r.title };
+        await d.savePlan(plan);
+        await d.emit({ type: "plan.updated", plan });
+        return { text: `Done. ${DAY_NAMES[wd]}'s dinner is ${r.title}.`, data: { plan } };
+      }
+      // Unsafe: cancel it and reroute to the safest swap (not already planned this week, best pantry coverage, closest cook time).
+      const planned = new Set(Object.entries(plan.days).filter(([day]) => day !== wd).map(([, e]) => e!.recipeId));
+      // If the day already has a safe dinner, keep it rather than reshuffling the week.
+      const current = plan.days[wd] ? recipes.find((x) => x.id === plan.days[wd]!.recipeId && x.id !== r.id) : undefined;
+      const kept = current && verifyRecipe(current, h, wd).ok ? current : undefined;
+      const swap = kept ?? recipes
+        .filter((x) => x.id !== r.id && !planned.has(x.id) && verifyRecipe(x, h, wd).ok)
+        .sort((x, y) => pantryCoverage(y, pantry) - pantryCoverage(x, pantry) || Math.abs(x.minutes - r.minutes) - Math.abs(y.minutes - r.minutes))[0];
+      const why = v.spoken[0] ?? v.reasons[0];
+      if (swap) plan.days[wd] = { recipeId: swap.id, title: swap.title };
+      plan.blocked = [{ title: r.title, reason: v.reasons[0] }, ...plan.blocked.filter((b) => b.title !== r.title)];
       await d.savePlan(plan);
       await d.emit({ type: "plan.updated", plan });
-      return { text: `Done. ${DAY_NAMES[wd]}'s dinner is ${r.title}.`, data: { plan } };
+      await d.emit({ type: "plan.rerouted", day: wd, cancelled: { title: r.title, reason: v.reasons[0] }, replacement: swap ? { recipeId: swap.id, title: swap.title } : null });
+      return {
+        text: kept
+          ? `Not the ${r.title.toLowerCase()}. ${why}, so ${DAY_NAMES[wd]} stays ${kept.title.toLowerCase()}.`
+          : swap
+          ? `Not the ${r.title.toLowerCase()}. ${why}, so I swapped in ${swap.title.toLowerCase()} for ${DAY_NAMES[wd]}.`
+          : `Not the ${r.title.toLowerCase()}. ${why}, and I couldn't find a safe swap for ${DAY_NAMES[wd]}, so it's open for now.`,
+        data: { cancelled: r.title, reasons: v.reasons, replacement: swap?.title ?? null, plan },
+      };
     },
   }),
 ];

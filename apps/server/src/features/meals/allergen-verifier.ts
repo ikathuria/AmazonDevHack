@@ -71,25 +71,42 @@ function dietViolation(recipe: Recipe, diet: Diet): string | undefined {
   }
 }
 
-export type Verdict = { ok: boolean; reasons: string[] };
+// reasons: precise, for the board and logs. spoken: short and human, for Alexa ("Maya's allergic to peanuts").
+export type Verdict = { ok: boolean; reasons: string[]; spoken: string[] };
+
+const ALLERGEN_WORDS: Record<Allergen, string> = {
+  peanut: "peanuts", tree_nut: "tree nuts", milk: "dairy", egg: "eggs", wheat: "wheat", gluten: "gluten",
+  soy: "soy", fish: "fish", shellfish: "shellfish", sesame: "sesame",
+};
+const DAY_WORDS: Record<Weekday, string> = { mon: "Mondays", tue: "Tuesdays", wed: "Wednesdays", thu: "Thursdays", fri: "Fridays", sat: "Saturdays", sun: "Sundays" };
 
 // day: when the recipe is planned for, so day rules like "vegetarian Tuesdays" apply.
 export function verifyRecipe(recipe: Recipe, household: Household, day?: Weekday): Verdict {
   const reasons: string[] = [];
+  const spoken: string[] = [];
   for (const member of household.members) {
     for (const ing of recipe.ingredients) {
       const hits = ingredientAllergens(ing).filter((a) => member.allergies.includes(a));
-      for (const a of hits) reasons.push(`${ing.name} contains ${a.replace("_", " ")} and ${member.name} is allergic`);
+      for (const a of hits) {
+        reasons.push(`${ing.name} contains ${a.replace("_", " ")} and ${member.name} is allergic`);
+        spoken.push(`${member.name}'s allergic to ${ALLERGEN_WORDS[a]}`);
+      }
     }
     for (const diet of member.diets) {
       const v = dietViolation(recipe, diet);
-      if (v) reasons.push(`${member.name} is ${diet.replace("_", " ")} and it ${v}`);
+      if (v) {
+        reasons.push(`${member.name} is ${diet.replace("_", " ")} and it ${v}`);
+        spoken.push(`${member.name} is ${diet.replace("_", " ")}`);
+      }
     }
   }
   const rule = day ? household.dayRules[day] : undefined;
-  if (rule) {
+  if (rule && day) {
     const v = dietViolation(recipe, rule);
-    if (v) reasons.push(`${day} is ${rule.replace("_", " ")} and it ${v}`);
+    if (v) {
+      reasons.push(`${day} is ${rule.replace("_", " ")} and it ${v}`);
+      spoken.push(`${DAY_WORDS[day]} are ${rule.replace("_", " ")} here`);
+    }
   }
-  return { ok: reasons.length === 0, reasons: [...new Set(reasons)] };
+  return { ok: reasons.length === 0, reasons: [...new Set(reasons)], spoken: [...new Set(spoken)] };
 }

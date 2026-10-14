@@ -28,6 +28,12 @@ describe("contracts", () => {
     expect(Recipe.safeParse({ id: "r", title: "x", minutes: 10, ingredients: [], steps: [] }).success).toBe(false);
   });
 
+  it("accepts a plan.rerouted event with or without a replacement", () => {
+    const base = { type: "plan.rerouted", day: "fri", cancelled: { title: "Peanut satay noodles", reason: "peanut" } };
+    expect(HomebaseEvent.safeParse({ ...base, replacement: { recipeId: "spinach-pasta", title: "Garlic spinach pasta" } }).success).toBe(true);
+    expect(HomebaseEvent.safeParse({ ...base, replacement: null }).success).toBe(true);
+  });
+
   it("discriminates events by type", () => {
     const e = HomebaseEvent.parse({ type: "voice.heard", utterance: "next step" });
     expect(e.type).toBe("voice.heard");

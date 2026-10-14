@@ -32,7 +32,7 @@ export async function runTool(tool: ToolDef, ctx: ToolContext, rawArgs: unknown)
     return await tool.handler(ctx, parsed.data);
   } catch (err) {
     console.error(`[tool:${tool.name}]`, err);
-    return { text: "Sorry, Homebase hit a problem doing that. Please try again.", isError: true };
+    return { text: "I couldn't reach your household's records just now, so nothing changed. Try again in a moment.", isError: true };
   }
 }
 

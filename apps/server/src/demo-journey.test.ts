@@ -72,10 +72,30 @@ describe("demo journey", () => {
     await client.close();
   });
 
-  it("refuses to put a peanut recipe on the plan and says why", async () => {
-    const { call, client } = await setup();
+  it("cancels a peanut recipe, reroutes to a safe one, and says why (the brand's hero moment)", async () => {
+    const { store, call, client } = await setup();
     const r = await call("set_dinner", { day: "friday", recipe: "peanut noodles" });
-    expect(r.text).toBe("I can't put Peanut satay noodles on Friday: peanut butter contains peanut and Maya is allergic. Want me to suggest something else?");
+    expect(r.text).toMatch(/^Not the peanut satay noodles\. Maya's allergic to peanuts, so I swapped in .+ for Friday\.$/);
+    const plan = (await store.getDoc<MealPlan>("patels", "PLAN"))!;
+    expect(plan.days.fri!.recipeId).not.toBe("peanut-noodles");
+    expect(plan.blocked[0].title).toBe("Peanut satay noodles");
+    const rerouted = (await store.eventsAfter("patels", 0, 100)).map((e) => e.event).find((e) => e.type === "plan.rerouted");
+    expect(rerouted).toMatchObject({ day: "fri", cancelled: { title: "Peanut satay noodles" }, replacement: { title: plan.days.fri!.title } });
+    await client.close();
+  });
+
+  it("keeps the day's existing safe dinner instead of reshuffling", async () => {
+    const { call, client } = await setup();
+    await call("set_dinner", { day: "friday", recipe: "dal tadka" });
+    const r = await call("set_dinner", { day: "friday", recipe: "peanut noodles" });
+    expect(r.text).toBe("Not the peanut satay noodles. Maya's allergic to peanuts, so Friday stays dal tadka.");
+    await client.close();
+  });
+
+  it("explains a house-rule clash in plain words", async () => {
+    const { call, client } = await setup();
+    const r = await call("set_dinner", { day: "tuesday", recipe: "chicken tikka" });
+    expect(r.text).toContain("Tuesdays are vegetarian here");
     await client.close();
   });
 
