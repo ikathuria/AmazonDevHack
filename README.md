@@ -10,6 +10,7 @@
 |---|---|
 | Simulated Alexa+ + live family board | `<ServerUrl>/sim`. Type or speak; the board on the right mirrors the TV |
 | "Dinner Departures" TV board (web backstop) | `<ServerUrl>/board`. Open it on a TV or laptop next to `/sim`; try "make Friday peanut noodles" to see the cancel + reroute |
+| Real Alexa (Echo / Fire TV) | Classic skill "home base" (dev stage on our account; see [`skill/README.md`](skill/README.md)). Say "Alexa, ask home base to plan dinners this week" |
 | MCP endpoint (Alexa+ / MCP Inspector) | `<ServerUrl>/mcp` (Streamable HTTP, MCP 2025-11-25, no login; acts on the demo household "The Patels") |
 | Live board feed | `<ServerUrl>/households/patels/events` (SSE) and `/households/patels/state` (snapshot) |
 | Run the demo journey yourself | `npm --prefix apps/server run journey -- <ServerUrl>` |
@@ -49,7 +50,8 @@ MCP tools never call an LLM; they read and write DynamoDB and return in about 10
 
 ## Sponsor tech, and what depends on it
 
-- **Alexa+ MCP add-on**: the voice interface. Homebase's 22 tools are designed for it (`addon/addon-package/addon.json`). Deploy is pending CLI access; see [`FRICTION_LOG.md`](FRICTION_LOG.md).
+- **Alexa+ MCP add-on**: Homebase's 22 tools are designed for it (`addon/addon-package/addon.json`). Amazon's MCP Preview is opening to partners in phases and we're waitlisted, so the Alexa+ path is shown through the simulated Alexa+ experience on the live MCP server; see [`FRICTION_LOG.md`](FRICTION_LOG.md).
+- **Alexa Skills Kit**: a classic skill, "home base", is the on-device voice front end, calling the same tools in-process (`apps/server/src/skill.ts`), so a real Echo or Fire TV drives the board.
 - **Fire TV (Vega OS)**: the shared family screen, subscribing to the SSE feed. In progress (`apps/tv`, spec in [`docs/04-tv-handoff.md`](docs/04-tv-handoff.md)). `/board` shows the same board in any browser.
 - **AWS**: Lambda with response streaming (MCP + SSE), DynamoDB, SQS, EventBridge, Amazon Bedrock (Claude) for meal planning and the simulated Alexa+ agent, and CDK for infrastructure. Without Bedrock, planning falls back to the deterministic planner.
 

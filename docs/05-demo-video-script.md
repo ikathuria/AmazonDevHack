@@ -10,7 +10,11 @@
 
 Judging may be AI-assisted and may see only a transcript, so **say every claim out loud**. The **[bracketed]** parts are what's on screen.
 
-**Which Alexa path to film:** if the real add-on is deployed by Oct 19, use an Echo or the Alexa app for the voice shots, and keep `/sim` for one "how it works" beat. Otherwise use `/sim` throughout and say clearly that it's a simulated Alexa+ experience; the rules allow it. Never imply the real add-on is certified or live if it isn't.
+**Which Alexa path to film (updated 2026-10-14):** the Alexa+ MCP Preview is waitlisted, so:
+- Film the voice shots on the **real Echo or Fire TV using the classic skill**: "Alexa, ask home base to …". It calls the same tools.
+- Show **`/sim` once** in the "how it works" beat, captioned "Alexa+ (simulated: MCP Preview waitlisted) → our MCP server".
+- Say it accurately in narration: "on Alexa today through a skill; built as an Alexa+ MCP add-on." Never imply the Alexa+ add-on is live.
+- Phrase the lines with the invocation name: "Alexa, ask home base to plan dinners this week". Inside a cooking session, "next step" and "start the timer" work alone.
 
 | Time | On screen | Narration (speak these words; adjust names only) |
 |---|---|---|

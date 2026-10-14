@@ -294,6 +294,8 @@ claude "Read PLAN.md and PROJECT.md. Without building anything new, test everyth
 
 ## Notes & Decisions
 
+- 2026-10-14 — Classic skill "home base" built and verified in the Alexa simulator: plan, cancel/reroute, chores, cook-along with session-kept "next step" and timer. `skill/README.md`.
+
 - 2026-10-14 — Amazon support: MCP Preview access is phased, waitlisted with no date. **Decision:** the Alexa+ entry = live self-hosted MCP server + simulated Alexa+ (`/sim`), stated honestly. ASK CLI installed (classic skills); a classic skill as an on-device voice front end is under consideration.
 
 - 2026-10-13 — Brand "Dinner Departures" adopted (`docs/BRAND.md`, `design/tokens.json`). `set_dinner` now reroutes instead of only refusing (the brand's hero moment); `plan.rerouted` added to contracts pending Builder 2's OK. Backstop `/board` built. Stale-week plans are no longer read as current.

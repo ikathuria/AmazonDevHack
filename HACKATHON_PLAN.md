@@ -197,6 +197,7 @@ Tools (each <500 ms, unit-tested):
 | Video takes longer than expected | High | Rough cut Oct 20, shot list ready by Oct 17 |
 
 ## 10. Notes & Decisions
+- 2026-10-14: Classic Alexa skill "home base" live (dev stage), so the video can show real Echo/Fire TV voice driving the board. Describe it as the on-device front end; the Alexa+ entry is the MCP server + simulated Alexa+.
 - 2026-10-14: MCP Preview waitlisted (support reply, no date). The Alexa+ path is the simulated experience on our live MCP server. The video and write-up must say add-on deployment is waitlisted, not imply it's live.
 - 2026-10-13: Brand "Dinner Departures" (`docs/BRAND.md`) drives the board, video and voice; the hero moment is now the on-screen cancel + reroute (`set_dinner` + `plan.rerouted`). Backstop `/board`, TV hand-off spec (`docs/04`), video script (`docs/05`) and `SUBMISSION.md` drafted. Fire TV track decision moved to Fri Oct 16.
 - 2026-10-08: User chose a mix of A (cook-along on TV) + D (household chores/meal agent). Team of 2 using Claude Code, Chicago timezone, has Prime (and so Alexa+), and a Fire TV device. Primary track **Alexa+** (also entering Fire TV), mini **AWS Builder**.

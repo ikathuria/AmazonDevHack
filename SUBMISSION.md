@@ -47,7 +47,7 @@ TODO (both of us, in our own words). Candidates: designing tools for an LLM call
 Alexa+ account linking (OAuth 2.1 + PKCE via Cognito) so any household can sign up; certification; a Fire TV Appstore release; a pilot with 5–10 households before thinking about pricing.
 
 ## Built with
-TypeScript · Alexa+ MCP add-on (MCP 2025-11-25) · @modelcontextprotocol/sdk · Hono · AWS Lambda · DynamoDB · SQS · EventBridge · Amazon Bedrock (Claude) · AWS CDK · Vitest · TODO: React Native for Vega / Vega SDK
+TypeScript · Alexa+ MCP add-on (MCP 2025-11-25) · Alexa Skills Kit (ASK CLI, ASK SDK for Node.js) · @modelcontextprotocol/sdk · Hono · AWS Lambda · DynamoDB · SQS · EventBridge · Amazon Bedrock (Claude) · AWS CDK · Vitest · TODO: React Native for Vega / Vega SDK
 
 ---
 
@@ -63,6 +63,12 @@ Draft from what we actually hit, with details in `FRICTION_LOG.md`. **Both of us
 - *Build again?* TODO yes/no + why.
 
 **Fire TV / Vega SDK:** TODO (Builder 2): what you used, setup, Virtual Device, sideloading, networking (SSE/fetch), focus management, onboarding time, build again?
+
+**Alexa Skills Kit (ASK CLI + ASK SDK for Node.js)**
+- *Used for:* the "home base" classic skill, the on-device voice front end on a real Echo/Fire TV (an interaction model generated from our data; intents run our tools in-process).
+- *Worked well:* `ask configure` and the SMAPI commands (`create-skill-for-vendor`, `set-interaction-model`, `simulate-skill`) made a scriptable, testable loop; entity resolution handled synonyms ("dairy" → milk).
+- *Needs work:* `SkillBuilders...lambda()` returns a callback handler that Node 24 Lambdas reject (`Runtime.CallbackHandlerDeprecated`), while Alexa only reports "There was a problem with the requested skill's response". Possessive samples like `{member}'s` fail the model build. `ask dialog --replay` stays interactive, so it can't be scripted.
+- *Build again?* TODO.
 
 **Amazon Bedrock**
 - *Used for:* weekly meal planning (worker) and the simulated Alexa+ agent (Converse API with tool use), Claude Haiku 4.5.

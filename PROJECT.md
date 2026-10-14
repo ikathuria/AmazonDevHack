@@ -16,7 +16,7 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 
 | Layer | Choice | Version | Notes |
 |---|---|---|---|
-| Voice | Alexa+ MCP add-on (`alexa-ai` CLI); **simulated Alexa+** at `/sim` until CLI access arrives | MCP spec 2025-11-25 | Streamable HTTP, US-only, <500 ms |
+| Voice | Alexa+ MCP add-on (`alexa-ai` CLI; **Preview waitlisted**) → **simulated Alexa+** at `/sim`; **classic skill "home base"** for real Echo/Fire TV voice | MCP spec 2025-11-25; ASK SDK 2.14 | `skill/README.md` |
 | MCP server | @modelcontextprotocol/sdk on Hono | 1.32.1 / 4.13.13 | AWS Lambda (Node 24, arm64) + Function URL with response streaming |
 | TV | React Native for Vega (`apps/tv`, Builder 2) | per Vega SDK | spec: `docs/04-tv-handoff.md`; backstop web board at `/board` |
 | Brand | "Dinner Departures" | — | `docs/BRAND.md` + `design/tokens.json` (source of truth) |
@@ -39,6 +39,7 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 4. `plan_week` enqueues to SQS. The worker Lambda asks Bedrock for picks, the **allergen verifier** decides, and a deterministic picker fills gaps or takes over.
 5. `set_dinner` with an unsafe recipe cancels it, reroutes to a safe one, and emits `plan.rerouted`, which drives the board's `CANCELLED · ALLERGY` moment.
 6. The TV's D-pad buttons call `POST /api/tools/:name`, the same registry as MCP.
+7. The classic skill ("Alexa, ask home base …") runs on its own Lambda (`skill-lambda.ts`) and calls the same tools in-process; cooking turns keep the session open.
 
 ---
 
@@ -50,6 +51,7 @@ apps/server/            # Builder 1. Hono app: MCP, REST tools, SSE, /sim, /boar
   src/lib/              #   tools registry, store (Dynamo/Memory), queue (SQS/Memory), agent (Bedrock tool loop), llm, docs, time, contracts re-export
   src/scripts/          #   seed, seed-data, bench, latency, live-journey, run-eval
   src/{app,lambda,local,worker,jobs}.ts, sim-page.ts, board-page.ts, legal-pages.ts, addon-media.ts (generated)
+skill/                  # classic Alexa skill "home base": manifest, generated interaction model, skill-id.txt, simulate.py
 apps/tv/                # Builder 2. Vega Fire TV app (not yet in the repo); spec docs/04-tv-handoff.md
 packages/contracts/     # shared zod schemas & types (both builders must agree on changes)
 infra/                  # CDK stack: table, server + worker Lambdas, SQS + DLQ, warm-up rule
@@ -90,13 +92,15 @@ spike/                  # M0 spike (historical)
 | 6. Pilot & retention gate | ☐ | Oct 26 – Nov 22 |
 | 7–9. Certify / Monetize / Polish | ☐ | gated on M6 |
 
-**In progress now:** Builder 2 on the Vega app. Waiting on organizers for Alexa CLI access.
+**In progress now:** Builder 2 on the Vega app. Classic skill live in dev stage (verified via the Alexa simulator); next: test on the real Echo/Fire TV.
 **Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws`. MCP `/mcp`, simulator `/sim`, board `/board`, feed `/households/patels/events`. Redeploy with `npm run deploy`; reseed with `TABLE_NAME=<CDK output> npm run seed`.
 **Next up:** Vega app per `docs/04-tv-handoff.md`; record shots per `docs/05-demo-video-script.md`.
 
 ---
 
 ## Decision log
+
+- 2026-10-14 — Built classic Alexa skill "home base" (ASK CLI/SDK) as the on-device voice front end; verified the full journey via `ask smapi simulate-skill`. Invocation needs two words ("home base"). Node 24 required an async handler (friction log).
 
 - 2026-10-14 — Alexa+ MCP Preview access waitlisted (phased rollout, no date). Alexa+ entry = live MCP server + simulated Alexa+. ASK CLI 2.30.7 installed, not yet configured.
 
