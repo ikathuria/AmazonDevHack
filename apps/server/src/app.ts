@@ -11,6 +11,7 @@ import { docs } from "./lib/docs.js";
 import { allTools } from "./features/index.js";
 import { runAgentTurn, type ChatModel } from "./lib/agent.js";
 import { SIM_PAGE } from "./sim-page.js";
+import { BOARD_PAGE } from "./board-page.js";
 import { PRIVACY_PAGE, TERMS_PAGE } from "./legal-pages.js";
 import { ADDON_MEDIA } from "./addon-media.js";
 import type { Message } from "@aws-sdk/client-bedrock-runtime";
@@ -70,6 +71,8 @@ export function createApp({ store, queue, demoHouseholdId, now = () => new Date(
   // Simulated Alexa+ (the hackathon rules' alternate path): an LLM plays Alexa and calls the same Homebase tools.
   // Clearly labelled as a simulation in the page; the real path is the MCP endpoint above.
   app.get("/sim", (c) => c.html(SIM_PAGE));
+  // Backstop 10-foot family board for any TV browser (the Vega app in apps/tv is the real Fire TV client).
+  app.get("/board", (c) => c.html(BOARD_PAGE));
   app.post("/api/sim/converse", async (c) => {
     if (!chatModel) return c.json({ error: "simulator disabled" }, 503);
     const body = await c.req.json().catch(() => ({})) as { utterance?: string; history?: Message[] };
