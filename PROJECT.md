@@ -2,13 +2,13 @@
 
 > Living context map. Any LLM or human should be able to read this file alone and understand what the project is, how it's built, and where things are. **Keep it in sync.**
 
-_Last updated: 2026-10-08_
+_Last updated: 2026-10-13_
 
 ---
 
 ## What it is
 
-Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS) app. Together they act as a household's shared memory: members, allergies and diets, pantry, a fair chore rota and the week's dinners. You talk to Alexa ("plan dinners this week", "who's on dishes?", "next step") and the family TV shows the board and walks through recipes hands-free. Built first for Amazon's *Build, Ship, Shape* hackathon (submit by 2026-10-22 18:00 CT), then as a product if a pilot shows households keep using it.
+Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS) app. Together they act as a household's shared memory: members, allergies and diets, pantry, a fair chore rota and the week's dinners. You talk to Alexa ("plan dinners this week", "who's on dishes?", "next step") and the family TV shows a "Dinner Departures" board that cancels unsafe dinners on screen and walks through recipes hands-free. Built first for Amazon's *Build, Ship, Shape* hackathon (feature freeze Mon 2026-10-19 22:00 CT; submit by Thu 2026-10-22 18:00 CT), then as a product if a pilot shows households keep using it.
 
 ---
 
@@ -16,56 +16,60 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 
 | Layer | Choice | Version | Notes |
 |---|---|---|---|
-| Voice | Alexa+ MCP add-on (`alexa-ai` CLI) | MCP spec 2025-11-25 | Streamable HTTP, US-only, <500 ms |
-| MCP server | @modelcontextprotocol/sdk on Hono | 1.32.1 / 4.13.13 | AWS Lambda (Node 24) + Function URL |
-| Visual cards | @modelcontextprotocol/ext-apps | 2.0.3 | Echo Show / mobile |
-| TV | React Native for Vega | per Vega SDK | subscribes via SSE |
-| Web | Vite + React SPA | latest at M1 | setup, login, browser board, export |
+| Voice | Alexa+ MCP add-on (`alexa-ai` CLI); **simulated Alexa+** at `/sim` until CLI access arrives | MCP spec 2025-11-25 | Streamable HTTP, US-only, <500 ms |
+| MCP server | @modelcontextprotocol/sdk on Hono | 1.32.1 / 4.13.13 | AWS Lambda (Node 24, arm64) + Function URL with response streaming |
+| TV | React Native for Vega (`apps/tv`, Builder 2) | per Vega SDK | spec: `docs/04-tv-handoff.md`; backstop web board at `/board` |
+| Brand | "Dinner Departures" | — | `docs/BRAND.md` + `design/tokens.json` (source of truth) |
 | Contracts | TypeScript + zod | 6.0.3 / 4.6.5 | `packages/contracts` (TS 6: typescript-eslint lacks TS 7 support) |
-| Database | DynamoDB on-demand, single table | — | |
-| AI | Bedrock Claude Haiku 4.5 (`us.` inference profile; 5.5 not enabled) via SQS worker | — | never in the request path |
-| Auth | Cognito (OAuth 2.1 + PKCE account linking) | — | |
-| IaC | AWS CDK | 2.273.0 | |
-| Tests | Vitest / Playwright / eval harness | 5.0.3 / 1.64.0 | |
+| Database | DynamoDB on-demand, single table, TTL on events | — | `docs/03-data-model.md` |
+| AI | Bedrock Claude Haiku 4.5 (`us.` inference profile; 5.5 not enabled) | — | SQS worker for planning; `/api/sim/converse` for the simulator; never in MCP tools |
+| Auth | Cognito (OAuth 2.1 + PKCE account linking) | — | not built yet (PLAN.md M5); every call acts on the demo household |
+| IaC | AWS CDK | 2.273.0 | `npm run deploy` |
+| Tests | Vitest + eval harness | 5.0.3 | 78 tests; `eval/latency.md`, `eval/RESULTS.md` |
 
-> Versions checked 2026-10-08. Re-verify before coding against a library.
+> Versions checked 2026-10-08/11. Re-verify before coding against a library.
 
 ---
 
 ## Architecture
 
-1. User speaks to Alexa+ (Echo / Fire TV / app). Alexa+ picks a Homebase MCP tool and calls `POST /mcp` with the account-linking bearer token.
-2. The server Lambda validates the token → householdId, reads/writes DynamoDB, and returns in <500 ms (target <200).
-3. Writes also append an event. The TV app holds `GET /households/:id/events` (SSE via Lambda response streaming) and re-renders.
-4. Slow work (`plan_week`, chore explanations) is put on SQS. The worker Lambda calls Bedrock, runs the **allergen verifier**, writes results, and emits SSE events.
-5. The web app (S3 + CloudFront) handles setup, Cognito login, TV pairing codes, the browser board, and export/delete.
+1. A user speaks to Alexa+ (or types/speaks on `/sim`). Alexa+ picks a Homebase MCP tool and calls `POST /mcp`; the simulator's Bedrock agent calls the same tools in-process.
+2. The server Lambda runs the tool against DynamoDB and returns in ~70 ms (p95 101 ms over 200 live calls; budget 500 ms). An EventBridge ping every 5 min keeps it warm.
+3. Every write appends a board event (`EVT#seq`). TVs load `GET /households/:id/state` once, then follow `GET /households/:id/events` (SSE; the server polls DynamoDB every 1 s; resume with `Last-Event-ID` or `?after=`).
+4. `plan_week` enqueues to SQS. The worker Lambda asks Bedrock for picks, the **allergen verifier** decides, and a deterministic picker fills gaps or takes over.
+5. `set_dinner` with an unsafe recipe cancels it, reroutes to a safe one, and emits `plan.rerouted`, which drives the board's `CANCELLED · ALLERGY` moment.
+6. The TV's D-pad buttons call `POST /api/tools/:name`, the same registry as MCP.
 
 ---
 
 ## Project structure
 
 ```
-apps/server/      # MCP server + REST + SSE + sim agent + worker (features/{household,meals,chores,pantry,cook,shopping}; lib/{tools,store,queue,agent,llm,docs,time})
-apps/tv/          # Vega Kitchen Board
-apps/web/         # setup / login / board / export
-packages/contracts/  # shared zod schemas & types
-infra/            # CDK
-eval/             # tool-selection eval + latency + e2e demo
-addon/            # alexa-ai add-on package draft (addon.json; media from scripts/make-addon-media.py)
-docs/             # numbered kebab-case docs
+apps/server/            # Builder 1. Hono app: MCP, REST tools, SSE, /sim, /board, /privacy, /terms, /media
+  src/features/         #   tools by domain: household (+data-tools), meals (planner, allergen-verifier), chores (rotation), cook, shopping, pantry
+  src/lib/              #   tools registry, store (Dynamo/Memory), queue (SQS/Memory), agent (Bedrock tool loop), llm, docs, time, contracts re-export
+  src/scripts/          #   seed, seed-data, bench, latency, live-journey, run-eval
+  src/{app,lambda,local,worker,jobs}.ts, sim-page.ts, board-page.ts, legal-pages.ts, addon-media.ts (generated)
+apps/tv/                # Builder 2. Vega Fire TV app (not yet in the repo); spec docs/04-tv-handoff.md
+packages/contracts/     # shared zod schemas & types (both builders must agree on changes)
+infra/                  # CDK stack: table, server + worker Lambdas, SQS + DLQ, warm-up rule
+eval/                   # requests.json (40, agent-written), RESULTS.md (37/40), latency.md
+addon/                  # Alexa+ add-on package draft (addon.json, media/)
+design/                 # tokens.json, cancel-moment.html, brand option previews
+scripts/                # make-addon-media.py (brand art from tokens)
+docs/                   # 01 platform notes · 03 data model · 04 TV hand-off · 05 video script · BRAND.md
+spike/                  # M0 spike (historical)
 ```
 
 ---
 
 ## Conventions
 
-- **Where new code goes:** each tool lives in `apps/server/src/features/<domain>/` with a colocated `*.test.ts`. Shared types go in `packages/contracts` only.
-- **File ownership (2 builders):**
-  - Builder 1: `apps/server`, `infra`, `eval`, `addon`.
-  - Builder 2: `apps/tv`, `apps/web`.
-  - `packages/contracts` changes only with both humans' agreement.
-- **Tools:** <500 ms, idempotent writes, speakable error messages, no LLM in the request path.
-- **Testing:** Vitest everywhere; Playwright for web; `npm run eval` for tool selection.
+- **Where new code goes:** each tool lives in `apps/server/src/features/<domain>/` with a colocated `*.test.ts`, registered in `features/index.ts`. Shared types go in `packages/contracts` only.
+- **File ownership:** Builder 1 owns `apps/server`, `infra`, `eval`, `addon`, `scripts`. Builder 2 owns `apps/tv`. `packages/contracts` changes need both builders.
+- **Tools:** <500 ms, idempotent writes, speakable messages in the brand voice (name the person and the reason; never "error"), no LLM in the request path.
+- **UI:** follow `docs/BRAND.md`; read colors and sizes from `design/tokens.json`.
+- **Testing:** `npm test` (contracts + server). Live checks: `npm --prefix apps/server run journey|latency -- <ServerUrl>`, `npm --prefix apps/server run eval`.
 - **Docs:** `docs/` filenames are zero-padded kebab-case.
 - **Before coding any library:** fetch its latest official docs.
 - Log SDK/doc friction to `FRICTION_LOG.md` (hackathon bonus).
@@ -76,25 +80,28 @@ docs/             # numbered kebab-case docs
 
 | Milestone | Status | Notes |
 |---|---|---|
-| 0. Spike | ◐ | MCP+SSE proven locally, via tunnel and on Lambda. Alexa+ deploy blocked on account allowlisting → simulated Alexa+ path is the demo fallback |
-| 1. Scaffold | ◐ | server/contracts/infra/CI done and deployed (us-east-1). Remaining: `apps/tv`, `apps/web` (Builder 2), BRAND.md gate |
-| 2. Core feature | ◐ | 22 server tools live + tested (MCP/REST/sim). Remaining: Vega TV app (Builder 2), real Alexa+ deploy (blocked) |
-| 3. Data + evidence | ◐ | data model doc, export/delete, latency report (p95 101 ms) done; eval runner done, needs 40 human requests + Bedrock form |
-| 4. UI/UX | ☐ | hackathon freeze Mon Oct 19 22:00 CT |
-| 5. Auth (account linking) | ☐ | parallel track |
+| 0. Spike | ◐ | MCP + SSE proven on Lambda. Real Alexa+ deploy blocked on CLI access (organizers asked) → simulated Alexa+ is the demo path |
+| 1. Scaffold | ✅ (server side) | monorepo, CI, CDK deploy, seed. Brand done (`docs/BRAND.md`). `apps/tv` is Builder 2's |
+| 2. Core feature | ◐ | 22 tools live + tested; cancel/reroute moment; `/sim` and branded `/board` live. **Remaining: Vega TV app (critical path)** |
+| 3. Data + evidence | ✅ | data model, export/delete, latency p95 101 ms, eval 37/40 |
+| 4. UI/UX | ◐ | `/board` and `/sim` in brand; the TV app must match. Freeze Mon Oct 19 22:00 CT |
+| 5. Auth (account linking) | ☐ | after the hackathon unless CLI access requires it sooner |
+| Hackathon M5–M7 (README, video, submit) | ◐ | README ✅, video script `docs/05`, Devpost draft `SUBMISSION.md`; record by Oct 19, rough cut Oct 20 |
 | 6. Pilot & retention gate | ☐ | Oct 26 – Nov 22 |
 | 7–9. Certify / Monetize / Polish | ☐ | gated on M6 |
 
-**In progress now:** waiting on human gates (Bedrock use-case form, Alexa CLI allowlist, eval requests, BRAND.md); Builder 2 on the Vega TV app. Simulated Alexa+ at `<ServerUrl>/sim`.
-**Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws` (MCP at `/mcp`, TV feed at `/households/patels/events`). Redeploy: `npm run deploy`; reseed: `TABLE_NAME=<CDK output> npm run seed`.
-**Next up:** M0 human setup (AWS, `alexa-ai configure`, Vega SDK, Fire TV dev mode).
+**In progress now:** Builder 2 on the Vega app. Waiting on organizers for Alexa CLI access.
+**Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws`. MCP `/mcp`, simulator `/sim`, board `/board`, feed `/households/patels/events`. Redeploy with `npm run deploy`; reseed with `TABLE_NAME=<CDK output> npm run seed`.
+**Next up:** Vega app per `docs/04-tv-handoff.md`; record shots per `docs/05-demo-video-script.md`.
 
 ---
 
 ## Decision log
 
-- 2026-10-11 — Alexa+ CLI access blocked (allowlist); simulated Alexa+ path is the demo fallback. Haiku 4.5 on Bedrock. TS 6.0.3. SSE polls DynamoDB at 1 s.
-
+- 2026-10-13 — `set_dinner` cancels unsafe dinners and reroutes to a safe one (keeps the day's existing safe dinner if there is one); new additive contract event `plan.rerouted` → **Builder 2 to confirm**. `/board`, `/sim` and add-on art rebuilt in the Dinner Departures brand. `get_plan`/`set_dinner` ignore a previous week's plan.
+- 2026-10-13 — Backstop `/board` added so the demo survives if the Vega app slips (it doesn't count as the Fire TV app).
+- 2026-10-11 — Eval: 40 agent-written requests (user's request, labelled), 37/40. Bedrock needed the Anthropic use-case form and a payment method.
+- 2026-10-11 — Alexa+ CLI access blocked (allowlist); simulated Alexa+ path is the demo fallback. Haiku 4.5 on Bedrock. TS 6.0.3. SSE polls DynamoDB at 1 s. Demo household protected from deletion.
 - 2026-10-08 — Idea: A+D mix (cook-along + household chores/meal agent). Tracks: Alexa+ (primary) + Fire TV; mini: AWS Builder.
 - 2026-10-08 — Research verdict weekend-prototype-first; user chose full product plan with a retention gate.
 - 2026-10-08 — Renamed Hearth → Homebase (Hearth Display collision).
@@ -105,9 +112,10 @@ docs/             # numbered kebab-case docs
 ## Glossary
 
 - **MCP add-on** — a third-party capability Alexa+ calls through our MCP server.
-- **Account linking / Tier 2 auth** — OAuth 2.1 auth code + PKCE flow Alexa+ runs when a user-specific tool is first used.
+- **Simulated Alexa+** — `/sim`: a Bedrock agent playing Alexa against the same tools (the rules' alternate path).
+- **Dinner Departures** — the brand: the TV as a train-station departure board for dinner.
+- **The cancel / reroute** — an unsafe dinner flips to `CANCELLED · ALLERGY`, the red ticker gives the reason, and a safe dinner takes its place (`plan.rerouted`).
+- **Account linking / Tier 2 auth** — the OAuth 2.1 auth code + PKCE flow Alexa+ runs when a user-specific tool is first used.
 - **Vega OS** — Amazon's new Linux-based Fire TV OS (React Native apps); only on newer sticks.
-- **Kitchen Board** — the Homebase TV app (This Week / Chores / Now Cooking / Shopping).
-- **Pairing code** — short code shown on the TV and entered on the web to bind a TV to a household.
-- **Allergen verifier** — deterministic check that blocks any recipe containing a member's allergen.
+- **Allergen verifier** — a deterministic check that blocks any recipe containing a member's allergen, including disguised names.
 - **Retention gate** — M6 go/no-go: ≥50% week-4 active households and ≥3 willing to pay.

@@ -1,12 +1,14 @@
 # 04 — Fire TV (Vega) app hand-off spec
 
-**Owner:** Builder 2 · **Folder:** `apps/tv/` (yours alone; don't edit `apps/server`, `infra`, `packages/contracts` without agreeing first) · **Written:** 2026-10-13 · **Feature freeze:** Mon Oct 19, 22:00 CT · **Submit:** Thu Oct 22, 18:00 CT
+**Owner:** Builder 2 · **Folder:** `apps/tv/` (yours alone; don't edit `apps/server`, `infra`, `packages/contracts` without agreeing first) · **Written:** 2026-10-13 (updated for BRAND.md the same day)
+
+> **Needs your OK:** on 2026-10-13 the server side added one event type to `packages/contracts`, `plan.rerouted` (§4.2). It's additive, so older clients ignore it, but CLAUDE.md says contract changes need both of you. Reply in chat or on the commit if you object. · **Feature freeze:** Mon Oct 19, 22:00 CT · **Submit:** Thu Oct 22, 18:00 CT
 
 ## 1. Why this matters (read first)
 
 Our Fire TV track entry is only valid if the **demo video shows the app running on a real Fire TV or the Vega Virtual Device** (rules §4). The backend is done and live; the TV app is the last thing on the critical path. Keep it **small, reliable and good-looking at 10 feet**: one screen, four panels, live updates, D-pad controls. No accounts, no settings and no navigation stack are needed.
 
-**Reference implementation:** `apps/server/src/board-page.ts`, live at `<ServerUrl>/board`. It's a web version of exactly this app with the same data flow, panels and buttons. Open it on a laptop next to `<ServerUrl>/sim` and say things. Port its behavior to React Native for Vega; you don't need to invent any of it.
+**Reference implementation:** `apps/server/src/board-page.ts`, live at `<ServerUrl>/board`. It's the "Dinner Departures" board this app should be: same data flow, rows, cancel moment and buttons, on a 1920×1080 canvas. Open it on a laptop next to `<ServerUrl>/sim` and say things. **Design rules:** [`docs/BRAND.md`](BRAND.md) and [`design/tokens.json`](../design/tokens.json) (source of truth; never hard-code a hex or size), plus the animation reference [`design/cancel-moment.html`](../design/cancel-moment.html). Port the board's behavior to React Native for Vega; you don't need to invent any of it.
 
 `<ServerUrl>` = `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws` (no auth; household `patels`).
 
@@ -20,27 +22,28 @@ Our Fire TV track entry is only valid if the **demo video shows the app running 
 
 **Open question to answer early (day 1):** does Vega's RN networking support **`EventSource`/SSE or streaming `fetch`**? If not, use the long-poll fallback in §4.3. It's already supported by the server, so it costs nothing to switch.
 
-## 3. The screen
+## 3. The screen ("Dinner Departures")
 
-One full-screen view, 1920×1080, dark background, readable from the sofa (body text ≥ 28 px, step text ≥ 56 px). Layout mirrors `/board`:
+One full-screen 1920×1080 view: a train-station departure board for dinner (see BRAND.md). Title-safe padding is 88 px horizontal and 64 px vertical, with the bottom 90 px reserved for the ticker. Top to bottom:
 
-| Panel | Shows | Data |
+| Region | Shows | Data |
 |---|---|---|
-| **Now cooking** (left, tallest) | recipe title, "step N of M", progress bar, the step text (big), a countdown timer, the 5 cooking buttons | `state.cook` + `cook.step` / `cook.timer` events |
-| **This week** (top right) | 7 days, tonight highlighted, plus up to 2 "⛔ Skipped X · reason" lines (**this is our demo's safety moment, so make it visible**) | `state.plan` + `plan.updated` |
-| **Chores today** (right) | `Name · chore` for today, ✓ when done | `state.choreAssignments` filtered to today + `state.chores` for names + `chores.updated` |
-| **Shopping** (right) | unchecked items, max ~8 | `state.shopping` + `shopping.updated` |
-| **Footer** | `Alexa heard: "…"` (latest utterance), plus 3 buttons: Plan the week · Split chores · Shopping list | `voice.heard` events |
-| **Header** | "Homebase", household name, clock, connection dot (● live / reconnecting…) | |
+| **Header** | ■ amber square + `THE PATELS · DINNER DEPARTURES` (Archivo 900, 64 px) · clock `20:21 TUE` (JetBrains Mono 800, 64 px, amber) · a 4 px amber rule underneath | `state.household.name` |
+| **Column heads** | `DAY  DINNER  STATUS` (mono 24 px, dim, letter-spaced) | |
+| **Board rows** (max 5, 10 px gaps, no borders) | today → the next 4 days. Tonight's row is lit amber: `BOARDING TONIGHT`, or `NOW COOKING · STEP 2/5` when its recipe is cooking. Other rows show `ON TIME` in green. A cancelled row (dim, struck through, red `CANCELLED · ALLERGY`) sits above the rerouted row (status `REROUTED`). While drafting: `PLANNING…`; stale week: `LAST WEEK'S PLAN / ASK FOR A NEW PLAN` | `state.plan` + `plan.updated` + `plan.rerouted` |
+| **Lower left: Now cooking** | `NOW COOKING · CHANA MASALA · STEP 1/5` (label), step text (40 px), timer `⏱ 14:56` (mono 64 px, amber; red `TIME'S UP` at 0). When nothing is cooking: `Heard: “…”` (last utterance) | `state.cook` + `cook.step` / `cook.timer` / `voice.heard` |
+| **Lower right: Hero** | `DISHES · GATE SINK` label + tonight's dishes person in 120 px amber Archivo (`PRIYA`), then a `SHOPPING · CILANTRO · LIMES` line | `state.choreAssignments` (today, `choreId: "dishes"`), `state.shopping` |
+| **Controls** | flap-tile buttons: START · ◀ BACK · REPEAT · NEXT ▶ · TIMER … PLAN WEEK · SPLIT CHORES · SHOPPING, plus a `● LIVE` / `RECONNECTING` indicator | §4.4 |
+| **Ticker** (bottom, full-bleed) | red bar, only on alerts, scrolling right to left at 120 px/s, hidden 20 s after the last alert: `⚠ PEANUT SATAY NOODLES CANCELLED · MAYA HAS AN ALLERGY → REROUTED TO GARLIC SPINACH PASTA` | `plan.rerouted`; also `plan.blocked` when a fresh plan arrives |
 
-States to handle:
-- **Plan drafting:** "Drafting… checking everyone's allergies".
-- **No plan / no rota / nothing cooking:** muted hint text, e.g. *Say "Alexa, ask Homebase to start cooking tonight's dinner", or press Start*.
-- **Stale plan** (`plan.weekOf` ≠ this week's Monday): show "Last week's plan".
-- **Timer at 0:** "Time's up!" plus a short chime.
-- **Offline:** a "reconnecting…" banner; keep the last good data on screen.
+**Signature moves (BRAND.md, must-have for the video):**
+1. **Split-flap:** when a row value changes, its characters flip in sequence (70 ms each, 25 ms stagger).
+2. **The cancel** (the demo's hero moment): on `plan.rerouted`, the cancelled row appears dimmed with a red status, the ticker slides up with the reason, and the rerouted row flaps to the safe dinner. Copy the timing from `design/cancel-moment.html`.
+3. **Hero name:** the dishes person in 120 px amber.
 
-Today's weekday key is `["mon","tue","wed","thu","fri","sat","sun"][(new Date().getDay() + 6) % 7]`. The household timezone is `state.household.timezone` (America/Chicago); the device clock is fine for the demo.
+Respect reduced motion (skip flips, swap values instantly). Keep one amber thing per area, and use red **only** for safety.
+
+Today's weekday key: `["mon","tue","wed","thu","fri","sat","sun"][(new Date().getDay() + 6) % 7]`. The household timezone is `state.household.timezone` (America/Chicago); the device clock is fine for the demo. A plan is stale when `plan.weekOf` isn't this week's Monday.
 
 ## 4. API contract (all live now)
 
@@ -79,13 +82,14 @@ Event types (`event.type`) and what to do:
 
 | type | payload | action |
 |---|---|---|
-| `plan.updated` | `plan` | replace plan |
+| `plan.updated` | `plan` | replace plan (a `plan.rerouted` follows when a dinner was cancelled) |
 | `chores.updated` | `assignments` | replace choreAssignments |
 | `household.updated` | `household` | replace household |
 | `shopping.updated` | `items` | replace shopping |
 | `cook.step` | `session`, `step`, `total` | simplest: re-fetch `/state` (gets the recipe title) |
 | `cook.timer` | `endsAt`, `label` | start countdown to `endsAt` |
-| `voice.heard` | `utterance` | footer "Alexa heard: …" |
+| `voice.heard` | `utterance` | `Heard: “…”` in the lower-left when nothing is cooking |
+| `plan.rerouted` | `day`, `cancelled {title, reason}`, `replacement {recipeId, title} \| null` | **the cancel moment** (§3); keep the cancelled row until the next `plan.updated` with `status: "drafting"` |
 | `ping` (event name only) | timestamp | ignore (keep-alive every 15 s) |
 
 **Reconnects:** each stream closes after about 10 minutes (a Lambda limit) and on network blips. Reconnect with `?after=<last seq you applied>` (or the `Last-Event-ID` header) and you'll get everything you missed. Never re-fetch from 0. Expect about 1 s latency (the server checks DynamoDB every second).
@@ -112,16 +116,17 @@ Response: `{ "text": "Step 2 of 5: …", "data": {…}, "isError"?: true }`. Sho
 - On launch, focus **Next ▶**.
 - Left/Right move between buttons in a row; Up/Down move between the cooking row and the footer row. Use `TVFocusGuideView` or the Vega focus APIs so focus never gets lost.
 - **Select/OK** presses the focused button. **Play/Pause** = Next step (a nice touch for flour-covered hands). **Back** on the remote does nothing (there's only one screen); don't exit the app on Back during the demo.
-- A focused button gets a thick, high-contrast ring (we use `#ffd479`); it must be visible from 3 m.
+- A focused button gets a 4 px amber outline offset 4 px (BRAND.md focus rule); it must be visible from 3 m.
 
 ## 6. Look
 
-Until `BRAND.md` exists, copy `/board`'s tokens: background `#101513`, panels `#18201d`, text `#eef2ef`, muted `#9fb0a8`, accent `#4fbf94`, warning `#f08b6c`, focus `#ffd479`, rounded 16 px panels. When the brand step lands, swap the tokens; the layout stays the same.
+Use [`docs/BRAND.md`](BRAND.md) and [`design/tokens.json`](../design/tokens.json): colors `bg #0E0F0C`, `row #1A1B17`, `flap #24251F`, `paper #ECE6D8`, `dim #8E8B80`, `amber #FFB84D` ("now" only), `red #FF4A3D` (safety only), `green #5BD18B`. Fonts are Archivo (500/900) and JetBrains Mono (500/800); bundle them with the app, since a TV may be offline. Sizes: label 24, body 32, row 40, header 64, hero 120. Corners are square (flap tiles 2 px); no shadows or gradients. Focus is a 4 px amber outline offset 4 px. Read the values from `tokens.json` (copy it into `apps/tv` at build time) instead of hard-coding them.
 
 ## 7. Done when (acceptance checklist; tick these in PLAN.md M2/M4)
 
 - [ ] App launches on the **Fire TV device** (or the Vega Virtual Device) and shows the Patels' board within 3 s.
-- [ ] Say/type in `/sim` "plan dinners this week". The TV shows "Drafting…" and then the 7 dinners plus the ⛔ peanut line, with no refresh.
+- [ ] Say/type in `/sim` "plan dinners this week". The TV shows `PLANNING…`, then the dinners flap in, with no refresh.
+- [ ] **The cancel:** "make Friday peanut noodles". The TV shows the struck-through `PEANUT SATAY NOODLES · CANCELLED · ALLERGY` row, the red ticker with the reason, and the rerouted row, all within ~2 s.
 - [ ] "split the chores": today's chores appear.
 - [ ] "let's cook tonight's dinner", then "next step", then "start the timer": the step text and countdown update within ~2 s, and "Time's up!" plus a chime fire at 0.
 - [ ] The D-pad alone can start cooking, go next/back/repeat and start a timer; the focus ring is always visible.
@@ -135,7 +140,7 @@ Until `BRAND.md` exists, copy `/board`'s tokens: background `#101513`, panels `#
 
 Film the real TV (phone on a tripod is fine), with the laptop running `/sim` out of shot or picture-in-picture:
 1. A wide shot of the kitchen with the TV board visible (2–3 s).
-2. "Plan dinners this week…" → the board fills in, and the ⛔ peanut line is visible (hold it 2 s).
+2. "Plan dinners this week…" → the dinners flap in. Then "make Friday peanut noodles" → **the cancel moment** (hold the red ticker 2 s).
 3. Cooking: "next step" ×2 and "start the timer". Hands busy (flour, a pan); **no remote in hand**.
 4. One D-pad press of Next ▶ to show the remote also works.
 5. "Who's on dishes tonight?" → answer spoken, chores panel visible.

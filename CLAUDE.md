@@ -4,7 +4,7 @@ See PROJECT.md for project context. PLAN.md is the build plan; HACKATHON_PLAN.md
 ## Agent Rules
 - Before using any library/SDK/API (MCP SDK, Alexa+ toolkit, Vega SDK, AWS), fetch its latest official docs; never code from memory.
 - Never modify tests to make them pass. Run lint + typecheck + tests before marking a task done.
-- File ownership: Server agent owns `server/ infra/ eval/`; TV agent owns `tv-app/`; `contracts/` changes only with both humans' agreement.
+- File ownership: Server agent owns `apps/server/ infra/ eval/ addon/ scripts/`; TV agent owns `apps/tv/` (spec: docs/04-tv-handoff.md); `packages/contracts/` changes only with both humans' agreement.
 - Every MCP tool must respond in <500 ms; never call Bedrock in the request path.
 - After FEATURE FREEZE (Mon Oct 19 22:00 CT): bug fixes, polish, evidence and submission assets only.
 - Never delete seeded demo data. Never commit secrets.

@@ -55,7 +55,7 @@
 | Alexa+ latency/bugs ruin UX (HN: "takes way too long") | med | high | Tools <200 ms target; idempotent tools; TV/D-pad and web fallbacks for every action |
 | Third-party Alexa integrations break silently (AnyList, March 2026) | med | med | Synthetic monitor calling the add-on daily; status banner on TV |
 | LLM-generated recipe violates an allergy | med | high | Deterministic allergen verifier blocks plans; ingredient-level allergen tags; disclaimer; never claim medical safety |
-| Vega only on newer sticks; Fire OS fragmentation | high | med | Ship Vega first; web board (`apps/web/board`) works on any browser/TV; Fire OS build is post-launch |
+| Vega only on newer sticks; Fire OS fragmentation | high | med | Ship Vega first; the backstop web board (`/board`, served by `apps/server`) works on any browser/TV; Fire OS build is post-launch |
 | No monetization path inside Alexa | high | med | Sell on the web; gate M8 on retention |
 | AWS free plan ends after 6 months | high | low | Expected cost <$5/mo; budget alarm at $10 |
 | Naming collision (Hearth Display) | — | — | Renamed to **Homebase**; check trademark before launch (M7) |
@@ -101,7 +101,7 @@ repo-root/
 ├─ apps/
 │  ├─ server/              # Hono + MCP server, SSE stream, Bedrock worker (Lambda handlers)
 │  │  └─ src/{app,features/{household,meals,chores,pantry,cook,shopping},lib}
-│  ├─ tv/                  # React Native for Vega app (Kitchen Board)
+│  ├─ tv/                  # React Native for Vega app ("Dinner Departures" board; spec docs/04-tv-handoff.md)
 │  └─ web/                 # Vite React: setup, account-linking login, browser board, export
 ├─ packages/
 │  └─ contracts/           # zod schemas + TS types: entities, tool I/O, SSE events
@@ -169,7 +169,7 @@ Tasks:
 - [x] GitHub Actions: install, lint, typecheck, test, `cdk synth` — Done when: the workflow passes on push
 - [x] Seed script `apps/server/scripts/seed.ts`: demo household "The Patels" (2 adults, 1 child, peanut allergy, vegetarian Tuesdays, 20 pantry items, 12 verified recipes) — Done when: `npm run seed` is idempotent (running twice → same item count)
 - [ ] Update PROJECT.md, CLAUDE.md, `.env.example` — Done when: committed
-- [ ] **Brand & UI (human gate):** run the `brand-studio` skill: 3–5 directions for a 10-foot TV UI + web, user picks, writes `BRAND.md` + tokens in `packages/contracts/tokens` (or `apps/*/src/theme`) — Done when: `BRAND.md` + token files exist and both humans approve
+- [x] **Brand & UI (human gate):** run the `brand-studio` skill: 3–5 directions for a 10-foot TV UI + web, user picks, writes `BRAND.md` + tokens in `packages/contracts/tokens` (or `apps/*/src/theme`) — Done when: `BRAND.md` + token files exist and both humans approve
 - [ ] Gate: lint, typecheck, full test suite pass
 
 ### Milestone 2: Core Feature: household memory + chores + cook-along (Oct 12–15)
@@ -184,7 +184,7 @@ Tasks (each tool: <200 ms target, unit tests colocated, idempotency key where it
 - [x] `features/cook`: `start_cooking(recipe|today)`, `next_step`, `previous_step`, `repeat_step`, `start_timer` → emit SSE events — Done when: an integration test drives a session and an SSE client receives ordered events
 - [x] `features/shopping`: `shopping_list` (plan ingredients minus pantry), `add_to_list`, `check_off` — Done when: tests pass
 - [~] `lib/sse.ts` + `GET /households/:id/events` (auth'd by a TV pairing token) with heartbeat + resume via Last-Event-ID *(done in `app.ts` incl. `GET /households/:id/state` snapshot and `POST /api/tools/:name` for D-pad; pairing-token auth waits for M5)* — Done when: reconnect test replays missed events
-- [ ] `apps/tv`: pairing-code screen (code shown on TV, entered on web) → Kitchen Board tabs: This Week / Chores / Now Cooking / Shopping; consumes SSE; D-pad actions call the same backend endpoints — Done when: on Vega Virtual Device + real Fire TV, the board updates from Alexa utterances
+- [ ] `apps/tv` (Builder 2): single-screen "Dinner Departures" board per `docs/04-tv-handoff.md` + `docs/BRAND.md` (no pairing for the hackathon; demo household); consumes SSE; D-pad calls `POST /api/tools/:name` — Done when: the §7 acceptance checklist in the hand-off spec passes on the Fire TV or Vega Virtual Device
 - [ ] `addon/addon.json`: tool descriptions + example phrases; `alexa-ai deploy` — Done when: the 12 scripted demo utterances work in the simulator; tag `demo-safe-1`
 - [x] E2E: script `eval/e2e-demo.ts` drives MCP tool calls for the demo journey and asserts SSE events + DynamoDB state — Done when: passes locally and in CI
 - [ ] Gate: lint, typecheck, full test suite pass
@@ -205,6 +205,12 @@ Tasks:
 - [x] `lib/agent.ts`: Bedrock Converse tool-use loop over the tool registry (unit-tested with a scripted model)
 - [x] `POST /api/sim/converse` + `GET /sim` page: voice in (Web Speech API), spoken replies, tool-call chips, live family-board mirror via `/state` + SSE — Done when: page renders and updates live (verified locally 2026-10-11)
 - [ ] Live LLM replies — blocked on the Bedrock Anthropic use-case form (account owner)
+
+### Milestone 3c: Backstop board + brand pass (added 2026-10-13)
+- [x] `/board`: 10-foot "Dinner Departures" web board (split-flap, cancel/reroute moment, ticker, hero name, D-pad focus), the same data path as the Vega app
+- [x] `set_dinner` cancels + reroutes unsafe dinners with spoken reasons; `plan.rerouted` event (additive contract change; Builder 2 to confirm)
+- [x] `/sim`, add-on media and spoken copy follow `docs/BRAND.md`
+- [x] Hand-off spec `docs/04-tv-handoff.md`, video script `docs/05-demo-video-script.md`, Devpost draft `SUBMISSION.md`
 
 ### Milestone 4: UI/UX (Oct 16–19; hackathon FEATURE FREEZE Mon Oct 19 22:00 CT)
 **Goal:** a real family can use the TV board and the web app without explanation.
@@ -287,6 +293,8 @@ claude "Read PLAN.md and PROJECT.md. Without building anything new, test everyth
 ---
 
 ## Notes & Decisions
+
+- 2026-10-13 — Brand "Dinner Departures" adopted (`docs/BRAND.md`, `design/tokens.json`). `set_dinner` now reroutes instead of only refusing (the brand's hero moment); `plan.rerouted` added to contracts pending Builder 2's OK. Backstop `/board` built. Stale-week plans are no longer read as current.
 
 - 2026-10-11 — Eval run: 37/40 (Haiku 4.5 via Bedrock). Misses are all context-free cook-along commands ("next", "say that again?", "let's make dinner"). Not tuned to pass. A follow-up eval with multi-turn cooking context would measure the real conversation.
 

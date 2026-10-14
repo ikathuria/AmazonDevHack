@@ -113,8 +113,10 @@ It hits the creative examples for Alexa+ (stateful, multi-step agentic workflow,
 | Final QA / pre-submit audit | Wed Oct 21, 22:00 | ~92% |
 | **Submit** | **Thu Oct 22, by 18:00 CT** (deadline Fri 14:00 CT) | |
 
+**Status at 2026-10-13 (Tue):** the backend is ahead of plan (all 22 tools live, p95 101 ms, eval 37/40, `/sim` and the branded `/board` live). Two items are behind: the **Vega TV app** (not started in the repo; it's the critical path for the Fire TV track) and the **real Alexa+ deploy** (CLI access blocked; the simulated path is allowed and works). **Decision point Fri Oct 16:** if the Vega app can't show the board on the device or simulator, submit to the Alexa+ track only and use `/board` on the TV browser for visuals.
+
 **Roles:**
-- **Builder 1 (Server):** owns `server/`, `infra/`, `eval/`, the add-on and Alexa+ testing.
+- **Builder 1 (Server):** owns `apps/server/`, `infra/`, `eval/`, `addon/`, the add-on and Alexa+ testing.
 - **Builder 2 (TV):** owns `tv-app/` and the video edit.
 - **Shared:** `contracts/` (change only by agreement), README, FRICTION_LOG.
 
@@ -195,6 +197,7 @@ Tools (each <500 ms, unit-tested):
 | Video takes longer than expected | High | Rough cut Oct 20, shot list ready by Oct 17 |
 
 ## 10. Notes & Decisions
+- 2026-10-13: Brand "Dinner Departures" (`docs/BRAND.md`) drives the board, video and voice; the hero moment is now the on-screen cancel + reroute (`set_dinner` + `plan.rerouted`). Backstop `/board`, TV hand-off spec (`docs/04`), video script (`docs/05`) and `SUBMISSION.md` drafted. Fire TV track decision moved to Fri Oct 16.
 - 2026-10-08: User chose a mix of A (cook-along on TV) + D (household chores/meal agent). Team of 2 using Claude Code, Chicago timezone, has Prime (and so Alexa+), and a Fire TV device. Primary track **Alexa+** (also entering Fire TV), mini **AWS Builder**.
 - 2026-10-08: Design rule: no LLM calls inside MCP tool requests (500 ms budget). Bedrock runs asynchronously only.
 

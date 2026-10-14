@@ -9,14 +9,14 @@
 - **Mini challenge:** AWS Builder (Lambda with response streaming, DynamoDB, SQS, EventBridge, Amazon Bedrock, CDK).
 - **Repo:** https://github.com/ikathuria/AmazonDevHack (public, MIT license visible in About)
 - **Video:** TODO YouTube/Vimeo link (public, < 3:00)
-- **Try it:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/sim` (simulated Alexa+ + live board), `/board` (TV board), `/mcp` (MCP endpoint). No login; demo household.
+- **Try it:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/sim` (simulated Alexa+ + live board), `/board` ("Dinner Departures" TV board), `/mcp` (MCP endpoint). No login; demo household.
 
 ## Inspiration
-Dinner in a busy household is a negotiation, not a recipe search: who's allergic to what, whose turn it is to cook, what's already in the pantry, and a greasy phone propped up for the instructions. Alexa+ can already suggest recipes; what it doesn't keep is the household's shared memory. We wanted the family TV, the one screen everyone already looks at, to be the kitchen board, run entirely by voice.
+Dinner in a busy household is a negotiation, not a recipe search. So we made the family TV a train-station departure board for dinner, where unsafe meals get cancelled on screen: who's allergic to what, whose turn it is to cook, what's already in the pantry, and a greasy phone propped up for the instructions. Alexa+ can already suggest recipes; what it doesn't keep is the household's shared memory. We wanted the family TV, the one screen everyone already looks at, to be the kitchen board, run entirely by voice.
 
 ## What it does
 - **Remembers the household** across sessions: members, allergies, diets, dislikes, house rules like vegetarian Tuesdays, the pantry and a chore history.
-- **Plans the week's dinners.** Claude on Amazon Bedrock proposes; a deterministic allergen and diet check decides, and every skipped recipe is shown with its reason ("Peanut satay noodles · Maya is allergic"). Asking for an unsafe dish directly gets a refusal with the reason.
+- **Plans the week's dinners.** Claude on Amazon Bedrock proposes; a deterministic allergen and diet check decides. Ask for an unsafe dish directly and the TV board flips it to `CANCELLED · ALLERGY`, a red ticker gives the reason, and a safe dinner takes its place. Alexa says: "Not the peanut satay noodles. Maya's allergic to peanuts, so I swapped in garlic spinach pasta for Friday."
 - **Splits chores fairly** by effort and history, gives children only small jobs, and answers "who's on dishes tonight?"
 - **Cooks along hands-free:** step-by-step on the TV, voice "next step" and timers, with the D-pad as a fallback.
 - **Builds the shopping list** from the plan minus the pantry.

@@ -2,13 +2,14 @@
 
 **An Alexa+ add-on that remembers your household (allergies, diets, pantry, a fair chore rota) and turns the family TV into a hands-free kitchen board.** Built for Amazon's *Build, Ship, Shape* hackathon (Alexa+ and Fire TV tracks, AWS Builder).
 
-> Status (2026-10-11): the backend and all 22 tools are live on AWS. Measured over 200 live calls: p50 71 ms, p95 101 ms, against Alexa+'s 500 ms budget. The allergen verifier blocks unsafe recipes, with 30+ test cases. The real Alexa+ deploy is waiting on CLI access, so the simulated Alexa+ path (`/sim`) is the current demo. The Fire TV (Vega) app is in progress. This README only claims what the code does today.
+> Status (2026-10-13): the backend and all 22 tools are live on AWS. Measured over 200 live calls: p50 71 ms, p95 101 ms, against Alexa+'s 500 ms budget. 37 of 40 household requests were routed to the right tool. Unsafe dinners are cancelled and rerouted with the reason (30+ allergen test cases). The real Alexa+ deploy is waiting on CLI access, so the simulated Alexa+ path (`/sim`) is the current demo. The Fire TV (Vega) app is in progress; `/board` is a web version of the same board. This README only claims what the code does today.
 
 ## Try it
 
 | What | Where |
 |---|---|
-| Simulated Alexa+ + live family board | `<ServerUrl>/sim`. Type or speak; the board on the right is what the TV shows |
+| Simulated Alexa+ + live family board | `<ServerUrl>/sim`. Type or speak; the board on the right mirrors the TV |
+| "Dinner Departures" TV board (web backstop) | `<ServerUrl>/board`. Open it on a TV or laptop next to `/sim`; try "make Friday peanut noodles" to see the cancel + reroute |
 | MCP endpoint (Alexa+ / MCP Inspector) | `<ServerUrl>/mcp` (Streamable HTTP, MCP 2025-11-25, no login; acts on the demo household "The Patels") |
 | Live board feed | `<ServerUrl>/households/patels/events` (SSE) and `/households/patels/state` (snapshot) |
 | Run the demo journey yourself | `npm --prefix apps/server run journey -- <ServerUrl>` |
@@ -37,6 +38,7 @@ MCP tools never call an LLM; they read and write DynamoDB and return in about 10
 | One tool registry serves MCP, REST (TV D-pad) and the simulated Alexa+ agent | `apps/server/src/lib/tools.ts`, `apps/server/src/features/index.ts` | `demo-journey.test.ts` ("serves the same tools over REST") |
 | Remembers household preferences across sessions | `features/household/tools.ts` | `demo-journey.test.ts` ("remembers preferences across sessions") |
 | Recipes are blocked if they contain a member's allergen, including disguised names (groundnut, satay, ghee, tahini…) | `features/meals/allergen-verifier.ts` | `allergen-verifier.test.ts` (20 cases + 10 adversarial synonyms) |
+| An unsafe dinner is cancelled and rerouted to a safe one, with the person and reason spoken and shown on the board | `features/meals/tools.ts` (`set_dinner`), `plan.rerouted` in `packages/contracts`, `board-page.ts` | `demo-journey.test.ts` ("cancels a peanut recipe, reroutes…", "keeps the day's existing safe dinner") |
 | House rules like vegetarian Tuesdays are enforced | `allergen-verifier.ts` (`dayRules`) | `allergen-verifier.test.ts`, `demo-journey.test.ts` |
 | The LLM proposes and the verifier decides; a deterministic planner fills gaps or takes over if the LLM fails | `features/meals/planner.ts`, `jobs.ts` | `demo-journey.test.ts` (unsafe LLM picks replaced; junk reply → fallback) |
 | Chores are split fairly by effort, carrying history across weeks; children only get small jobs | `features/chores/rotation.ts` | `rotation.test.ts` (8-week fairness bound) |
@@ -48,12 +50,12 @@ MCP tools never call an LLM; they read and write DynamoDB and return in about 10
 ## Sponsor tech, and what depends on it
 
 - **Alexa+ MCP add-on**: the voice interface. Homebase's 22 tools are designed for it (`addon/addon-package/addon.json`). Deploy is pending CLI access; see [`FRICTION_LOG.md`](FRICTION_LOG.md).
-- **Fire TV (Vega OS)**: the shared family screen, subscribing to the SSE feed. In progress.
+- **Fire TV (Vega OS)**: the shared family screen, subscribing to the SSE feed. In progress (`apps/tv`, spec in [`docs/04-tv-handoff.md`](docs/04-tv-handoff.md)). `/board` shows the same board in any browser.
 - **AWS**: Lambda with response streaming (MCP + SSE), DynamoDB, SQS, EventBridge, Amazon Bedrock (Claude) for meal planning and the simulated Alexa+ agent, and CDK for infrastructure. Without Bedrock, planning falls back to the deterministic planner.
 
 ## Evidence
 
-- `npm test` runs 73 tests: contracts, allergen verifier, chore fairness, the full demo journey through a real MCP client, SSE resume, export/delete, and the agent loop.
+- `npm test` runs 78 tests: contracts, allergen verifier, chore fairness, the full demo journey through a real MCP client (including cancel + reroute), SSE resume, export/delete, the agent loop and the web pages.
 - [`eval/latency.md`](eval/latency.md): live per-tool latency.
 - [`eval/RESULTS.md`](eval/RESULTS.md): **37/40** right tool + arguments (Claude Haiku 4.5 on Bedrock as the client). The 3 misses are context-free cook-along commands ("next", "say that again?", "let's make dinner"), each run with no conversation history. Tool-selection accuracy on 40 casual household requests (agent-written at the team's request; same agent wrote the tool descriptions, so read the score as optimistic) (`npm --prefix apps/server run eval`).
 
@@ -88,4 +90,4 @@ npm run deploy                                   # CDK; outputs ServerUrl, Table
 TABLE_NAME=<TableName> npm run seed
 ```
 
-Project docs: [`PLAN.md`](PLAN.md) (build plan), [`HACKATHON_PLAN.md`](HACKATHON_PLAN.md), [`PROJECT.md`](PROJECT.md), [`RESEARCH.md`](RESEARCH.md), [`docs/`](docs/). License: MIT.
+Project docs: [`PLAN.md`](PLAN.md) (build plan), [`HACKATHON_PLAN.md`](HACKATHON_PLAN.md), [`PROJECT.md`](PROJECT.md), [`RESEARCH.md`](RESEARCH.md), [`docs/BRAND.md`](docs/BRAND.md) ("Dinner Departures"), [`docs/`](docs/) (platform notes, data model, TV hand-off, video script), [`SUBMISSION.md`](SUBMISSION.md). License: MIT.
