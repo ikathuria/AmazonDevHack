@@ -94,6 +94,27 @@ export class HomebaseStack extends cdk.Stack {
     worker.addEventSource(new SqsEventSource(planQueue, { batchSize: 1 }));
     worker.addToRolePolicy(bedrockInvoke);
 
+    // Classic Alexa skill ("home base"): on-device voice front end for the same tools (Alexa+ MCP Preview is waitlisted).
+    const skillId: string | undefined = this.node.tryGetContext("skillId");
+    const skillFn = new NodejsFunction(this, "Skill", {
+      ...common,
+      environment: { ...common.environment, ...(skillId ? { SKILL_ID: skillId } : {}) },
+      entry: path.join(serverSrc, "skill-lambda.ts"),
+      logGroup: logGroup("Skill"),
+      handler: "handler",
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(8),
+    });
+    table.grantReadWriteData(skillFn);
+    planQueue.grantSendMessages(skillFn);
+    // Before the skill exists we can't know its ID; once created, redeploy with -c skillId=amzn1.ask.skill... to lock the trigger to it.
+    skillFn.addPermission("AlexaSkillTrigger", {
+      principal: new iam.ServicePrincipal("alexa-appkit.amazon.com"),
+      action: "lambda:InvokeFunction",
+      ...(skillId ? { eventSourceToken: skillId } : {}),
+    });
+    new cdk.CfnOutput(this, "SkillFunctionArn", { value: skillFn.functionArn });
+
     new cdk.CfnOutput(this, "ServerUrl", { value: url.url });
     new cdk.CfnOutput(this, "TableName", { value: table.tableName });
     new cdk.CfnOutput(this, "PlanQueueUrl", { value: planQueue.queueUrl });

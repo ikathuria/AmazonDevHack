@@ -1,0 +1,637 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "home base",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NextIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PreviousIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "samples": []
+        },
+        {
+          "name": "PlanWeekIntent",
+          "samples": [
+            "plan dinners this week",
+            "plan dinners",
+            "plan the week",
+            "make a meal plan",
+            "plan this week's dinners",
+            "sort out dinners this week"
+          ]
+        },
+        {
+          "name": "PlanWeekWithRequestIntent",
+          "slots": [
+            {
+              "name": "request",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "plan dinners this week but {request}",
+            "plan dinners and {request}",
+            "plan the week with {request}"
+          ]
+        },
+        {
+          "name": "GetPlanIntent",
+          "slots": [
+            {
+              "name": "day",
+              "type": "DAY"
+            }
+          ],
+          "samples": [
+            "what's for dinner",
+            "what's for dinner {day}",
+            "what are we having {day}",
+            "what are we eating {day}",
+            "what's the plan for {day}",
+            "what's for dinner on {day}"
+          ]
+        },
+        {
+          "name": "GetWeekIntent",
+          "samples": [
+            "read me the week",
+            "read me the meal plan",
+            "what's the plan this week",
+            "what are we eating this week"
+          ]
+        },
+        {
+          "name": "SetDinnerIntent",
+          "slots": [
+            {
+              "name": "day",
+              "type": "DAY"
+            },
+            {
+              "name": "recipe",
+              "type": "RECIPE"
+            }
+          ],
+          "samples": [
+            "make {day} {recipe}",
+            "put {recipe} on {day}",
+            "can we have {recipe} {day}",
+            "can we have {recipe} on {day}",
+            "have {recipe} for dinner {day}",
+            "swap {day} to {recipe}",
+            "let's have {recipe} {day}"
+          ]
+        },
+        {
+          "name": "AssignChoresIntent",
+          "samples": [
+            "split the chores",
+            "split the chores fairly",
+            "make a chore chart",
+            "redo the rota",
+            "make the chore rota"
+          ]
+        },
+        {
+          "name": "WhosOnIntent",
+          "slots": [
+            {
+              "name": "chore",
+              "type": "CHORE"
+            },
+            {
+              "name": "day",
+              "type": "DAY"
+            }
+          ],
+          "samples": [
+            "who's on {chore}",
+            "who's on {chore} {day}",
+            "whose turn is it to do the {chore}",
+            "who's doing the {chore} {day}",
+            "who's doing {chore}"
+          ]
+        },
+        {
+          "name": "MemberChoresIntent",
+          "slots": [
+            {
+              "name": "member",
+              "type": "MEMBER"
+            },
+            {
+              "name": "day",
+              "type": "DAY"
+            }
+          ],
+          "samples": [
+            "what does {member} have to do",
+            "what does {member} have to do {day}",
+            "what are the chores for {member}",
+            "what chores does {member} have {day}"
+          ]
+        },
+        {
+          "name": "ChoreDoneIntent",
+          "slots": [
+            {
+              "name": "chore",
+              "type": "CHORE"
+            }
+          ],
+          "samples": [
+            "{chore} is done",
+            "{chore} are done",
+            "{chore} done",
+            "mark {chore} done",
+            "the {chore} is out",
+            "I finished the {chore}"
+          ]
+        },
+        {
+          "name": "ChoreBalanceIntent",
+          "samples": [
+            "is the chore split fair",
+            "who's done the most chores",
+            "how fair are the chores"
+          ]
+        },
+        {
+          "name": "StartCookingIntent",
+          "slots": [
+            {
+              "name": "recipe",
+              "type": "RECIPE"
+            }
+          ],
+          "samples": [
+            "let's cook",
+            "let's make dinner",
+            "start cooking",
+            "start cooking {recipe}",
+            "walk me through {recipe}",
+            "let's cook {recipe}",
+            "cook tonight's dinner"
+          ]
+        },
+        {
+          "name": "NextStepIntent",
+          "samples": [
+            "next step",
+            "what's next",
+            "done what now",
+            "okay next",
+            "go on"
+          ]
+        },
+        {
+          "name": "StartTimerIntent",
+          "slots": [
+            {
+              "name": "minutes",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "start the timer",
+            "start a timer",
+            "set a timer for {minutes} minutes",
+            "timer for {minutes} minutes",
+            "start the timer for this step"
+          ]
+        },
+        {
+          "name": "ShoppingListIntent",
+          "samples": [
+            "what do we need to buy",
+            "make the shopping list",
+            "what's on the shopping list",
+            "what do I need from the store"
+          ]
+        },
+        {
+          "name": "AddToListIntent",
+          "slots": [
+            {
+              "name": "item",
+              "type": "AMAZON.Food"
+            }
+          ],
+          "samples": [
+            "add {item} to the list",
+            "add {item} to the shopping list",
+            "we need {item}",
+            "we're out of {item}"
+          ]
+        },
+        {
+          "name": "HouseholdIntent",
+          "samples": [
+            "what do you know about us",
+            "who's allergic to what",
+            "what do you know about our family"
+          ]
+        },
+        {
+          "name": "AddAllergyIntent",
+          "slots": [
+            {
+              "name": "member",
+              "type": "MEMBER"
+            },
+            {
+              "name": "allergen",
+              "type": "ALLERGEN"
+            }
+          ],
+          "samples": [
+            "{member} is allergic to {allergen}",
+            "{member} can't have {allergen}",
+            "{member} can't eat {allergen}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "DAY",
+          "values": [
+            {
+              "id": "today",
+              "name": {
+                "value": "today",
+                "synonyms": [
+                  "tonight",
+                  "this evening"
+                ]
+              }
+            },
+            {
+              "id": "tomorrow",
+              "name": {
+                "value": "tomorrow",
+                "synonyms": [
+                  "tomorrow night"
+                ]
+              }
+            },
+            {
+              "id": "monday",
+              "name": {
+                "value": "monday",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "tuesday",
+              "name": {
+                "value": "tuesday",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "wednesday",
+              "name": {
+                "value": "wednesday",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "thursday",
+              "name": {
+                "value": "thursday",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "friday",
+              "name": {
+                "value": "friday",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "saturday",
+              "name": {
+                "value": "saturday",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "sunday",
+              "name": {
+                "value": "sunday",
+                "synonyms": []
+              }
+            }
+          ]
+        },
+        {
+          "name": "RECIPE",
+          "values": [
+            {
+              "id": "chana-masala",
+              "name": {
+                "value": "chana masala",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "dal-tadka",
+              "name": {
+                "value": "dal tadka",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "spinach-pasta",
+              "name": {
+                "value": "garlic spinach pasta",
+                "synonyms": [
+                  "spinach pasta"
+                ]
+              }
+            },
+            {
+              "id": "veggie-quesadillas",
+              "name": {
+                "value": "veggie quesadillas",
+                "synonyms": [
+                  "quesadillas"
+                ]
+              }
+            },
+            {
+              "id": "egg-fried-rice",
+              "name": {
+                "value": "egg fried rice",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "aloo-gobi",
+              "name": {
+                "value": "aloo gobi",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "chicken-tikka",
+              "name": {
+                "value": "sheet-pan chicken tikka",
+                "synonyms": [
+                  "chicken tikka"
+                ]
+              }
+            },
+            {
+              "id": "salmon-rice",
+              "name": {
+                "value": "soy-glazed salmon with rice",
+                "synonyms": [
+                  "salmon with rice"
+                ]
+              }
+            },
+            {
+              "id": "lentil-soup",
+              "name": {
+                "value": "red lentil soup",
+                "synonyms": [
+                  "lentil soup"
+                ]
+              }
+            },
+            {
+              "id": "potato-frittata",
+              "name": {
+                "value": "potato and spinach frittata",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "chickpea-wraps",
+              "name": {
+                "value": "crispy chickpea wraps",
+                "synonyms": [
+                  "chickpea wraps"
+                ]
+              }
+            },
+            {
+              "id": "peanut-noodles",
+              "name": {
+                "value": "peanut satay noodles",
+                "synonyms": []
+              }
+            }
+          ]
+        },
+        {
+          "name": "CHORE",
+          "values": [
+            {
+              "id": "dishes",
+              "name": {
+                "value": "dishes",
+                "synonyms": [
+                  "the dishes",
+                  "washing up"
+                ]
+              }
+            },
+            {
+              "id": "cook",
+              "name": {
+                "value": "cooking dinner",
+                "synonyms": [
+                  "cooking",
+                  "dinner"
+                ]
+              }
+            },
+            {
+              "id": "trash",
+              "name": {
+                "value": "taking out the trash",
+                "synonyms": [
+                  "trash",
+                  "the trash",
+                  "garbage",
+                  "bins"
+                ]
+              }
+            },
+            {
+              "id": "laundry",
+              "name": {
+                "value": "laundry",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "vacuum",
+              "name": {
+                "value": "vacuuming",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "groceries",
+              "name": {
+                "value": "grocery run",
+                "synonyms": []
+              }
+            }
+          ]
+        },
+        {
+          "name": "MEMBER",
+          "values": [
+            {
+              "id": "priya",
+              "name": {
+                "value": "priya",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "arjun",
+              "name": {
+                "value": "arjun",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "maya",
+              "name": {
+                "value": "maya",
+                "synonyms": []
+              }
+            }
+          ]
+        },
+        {
+          "name": "ALLERGEN",
+          "values": [
+            {
+              "id": "peanut",
+              "name": {
+                "value": "peanuts",
+                "synonyms": [
+                  "peanut",
+                  "groundnuts"
+                ]
+              }
+            },
+            {
+              "id": "tree_nut",
+              "name": {
+                "value": "tree nuts",
+                "synonyms": [
+                  "nuts",
+                  "almonds",
+                  "cashews",
+                  "walnuts"
+                ]
+              }
+            },
+            {
+              "id": "milk",
+              "name": {
+                "value": "dairy",
+                "synonyms": [
+                  "milk",
+                  "lactose"
+                ]
+              }
+            },
+            {
+              "id": "egg",
+              "name": {
+                "value": "eggs",
+                "synonyms": [
+                  "egg"
+                ]
+              }
+            },
+            {
+              "id": "wheat",
+              "name": {
+                "value": "wheat",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "gluten",
+              "name": {
+                "value": "gluten",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "soy",
+              "name": {
+                "value": "soy",
+                "synonyms": [
+                  "soya"
+                ]
+              }
+            },
+            {
+              "id": "fish",
+              "name": {
+                "value": "fish",
+                "synonyms": []
+              }
+            },
+            {
+              "id": "shellfish",
+              "name": {
+                "value": "shellfish",
+                "synonyms": [
+                  "shrimp",
+                  "prawns"
+                ]
+              }
+            },
+            {
+              "id": "sesame",
+              "name": {
+                "value": "sesame",
+                "synonyms": [
+                  "sesame seeds"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -13,7 +13,8 @@
     "journey": "tsx src/scripts/live-journey.ts",
     "bench": "tsx src/scripts/bench.ts",
     "latency": "tsx src/scripts/latency.ts",
-    "eval": "tsx src/scripts/run-eval.ts"
+    "eval": "tsx src/scripts/run-eval.ts",
+    "skill:model": "tsx src/scripts/build-skill-model.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1149.0",
@@ -22,6 +23,8 @@
     "@aws-sdk/lib-dynamodb": "^3.1149.0",
     "@hono/node-server": "^2.1.4",
     "@modelcontextprotocol/sdk": "^1.32.1",
+    "ask-sdk-core": "^2.14.0",
+    "ask-sdk-model": "^1.86.0",
     "hono": "^4.13.13",
     "zod": "^4.6.5"
   },

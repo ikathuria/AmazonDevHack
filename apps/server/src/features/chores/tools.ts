@@ -24,7 +24,7 @@ export const choreTools = [
       await d.saveChoreState(state);
       await d.emit({ type: "chores.updated", assignments });
       const weekLoad = Object.fromEntries(h.members.map((m) => [m.id, load[m.id] - (history[m.id] ?? 0)]));
-      const summary = h.members.map((m) => `${m.name} ${weekLoad[m.id]} points`).join(", ");
+      const summary = h.members.map((m) => `${m.name} ${weekLoad[m.id]} point${weekLoad[m.id] === 1 ? "" : "s"}`).join(", ");
       return { text: `Chores are split for the week, weighted by effort: ${summary}. It's on the TV.`, data: { assignments, weekLoad } };
     },
   }),

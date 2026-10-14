@@ -1,0 +1,37 @@
+{
+  "manifest": {
+    "manifestVersion": "1.0",
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "name": "Homebase",
+          "summary": "Your family's memory: safe dinner plans, fair chores and hands-free cooking on your TV.",
+          "description": "Homebase remembers your household's allergies, diets, pantry and chore rota. Plan the week's dinners, and anything unsafe for someone gets cancelled and swapped. It splits chores fairly, tells you who's on dishes, and walks you through recipes step by step while the Homebase board on your TV follows along. Not medical advice: always check labels.",
+          "examplePhrases": [
+            "Alexa, ask home base to plan dinners this week",
+            "Alexa, ask home base who's on dishes tonight",
+            "Alexa, ask home base to start cooking"
+          ],
+          "keywords": ["meal planning", "chores", "allergies", "cooking", "family"]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "distributionCountries": ["US"],
+      "testingInstructions": "Development-stage demo skill for the Build, Ship, Shape hackathon. Acts on a shared demo household. Open https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/board to watch the TV board update.",
+      "category": "COOKING_AND_RECIPE"
+    },
+    "apis": {
+      "custom": {
+        "endpoint": { "uri": "arn:aws:lambda:us-east-1:996385806727:function:HomebaseStack-Skill1D3B2853-wLEBQoKq6ycL" }
+      }
+    },
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "locales": { "en-US": { "privacyPolicyUrl": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/privacy", "termsOfUseUrl": "https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws/terms" } }
+    }
+  }
+}
