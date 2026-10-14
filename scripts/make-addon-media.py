@@ -1,45 +1,77 @@
-"""Generates provisional Alexa add-on media (icons, carousel, banner) and a TS module embedding them.
-Provisional: regenerate from BRAND.md tokens after the brand step. Usage: python3 scripts/make-addon-media.py"""
+"""Generates Alexa add-on media (icons, carousel, banner) in the "Dinner Departures" brand (docs/BRAND.md,
+design/tokens.json) and a TS module embedding them. Uses Archivo/JetBrains Mono if installed, else a bold system fallback.
+Usage: python3 scripts/make-addon-media.py"""
+import json
 import base64, io, pathlib
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "addon" / "media"
-GREEN, CREAM, INK = (31, 122, 92), (246, 244, 239), (29, 35, 33)
+TOK = json.loads((pathlib.Path(__file__).resolve().parent.parent / "design" / "tokens.json").read_text())["color"]
+hexrgb = lambda h: tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+BG, ROW, PAPER, DIM, AMBER, RED = (hexrgb(TOK[k]) for k in ("bg", "row", "paper", "dim", "amber", "red"))
 
-def house(draw, cx, cy, size, color):
-    s = size
-    draw.polygon([(cx - s * .42, cy - s * .02), (cx, cy - s * .40), (cx + s * .42, cy - s * .02)], fill=color)
-    draw.rectangle([cx - s * .30, cy - s * .04, cx + s * .30, cy + s * .34], fill=color)
-    draw.rectangle([cx - s * .08, cy + s * .10, cx + s * .08, cy + s * .34], fill=GREEN if color == CREAM else CREAM)
-
-def font(px):
-    for f in ["/System/Library/Fonts/Supplemental/Arial Bold.ttf", "/System/Library/Fonts/Helvetica.ttc"]:
+def font(px, mono=False):
+    names = (["JetBrainsMono-ExtraBold.ttf", "JetBrains Mono ExtraBold.ttf"] if mono else ["ArchivoBlack-Regular.ttf", "Archivo-Black.ttf", "Archivo-ExtraBold.ttf"])
+    dirs = [pathlib.Path.home() / "Library/Fonts", pathlib.Path("/Library/Fonts"), pathlib.Path("/System/Library/Fonts/Supplemental")]
+    for d in dirs:
+        for n in names:
+            if (d / n).exists(): return ImageFont.truetype(str(d / n), px)
+    for f in (["/System/Library/Fonts/Menlo.ttc"] if mono else []) + ["/System/Library/Fonts/Supplemental/Arial Black.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf"]:
         try: return ImageFont.truetype(f, px)
         except OSError: pass
     return ImageFont.load_default()
 
 def icon(px, dark=False):
-    img = Image.new("RGB", (px, px), INK if dark else GREEN)
-    house(ImageDraw.Draw(img), px / 2, px / 2 + px * .04, px * .9, CREAM)
+    # Platform-indicator square, the only mark the brand allows before the hackathon ends.
+    img = Image.new("RGB", (px, px), BG if dark else ROW)
+    d = ImageDraw.Draw(img)
+    s = px * .38
+    d.rectangle([px / 2 - s / 2, px / 2 - s / 2, px / 2 + s / 2, px / 2 + s / 2], fill=AMBER)
+    d.rectangle([0, px - max(2, px // 24), px, px], fill=AMBER)
     return img
 
-def poster(w, h, title, lines):
-    img = Image.new("RGB", (w, h), CREAM)
+def wordmark(d, x, y, px):
+    d.rectangle([x, y + px * .22, x + px * .45, y + px * .67], fill=AMBER)
+    d.text((x + px * .75, y), "HOMEBASE", font=font(px), fill=PAPER)
+
+def board_rows(d, x, y, w, rows, px):
+    for i, (day, dinner, status, color) in enumerate(rows):
+        top = y + i * px * 1.9
+        d.rectangle([x, top, x + w, top + px * 1.55], fill=AMBER if color == "now" else ROW)
+        ink = BG if color == "now" else PAPER
+        d.text((x + px * .6, top + px * .3), day, font=font(px, True), fill=ink if color != "cancel" else DIM)
+        d.text((x + px * 3.2, top + px * .3), dinner, font=font(px, True), fill=ink if color != "cancel" else DIM)
+        st_fill = {"now": BG, "cancel": RED}.get(color, (91, 209, 139))
+        d.text((x + w - px * .6, top + px * .3), status, font=font(px, True), fill=st_fill, anchor="ra")
+
+def poster(w, h, rows, tagline, hero=True):
+    img = Image.new("RGB", (w, h), BG)
     d = ImageDraw.Draw(img)
-    d.rectangle([0, 0, w, int(h * .42)], fill=GREEN)
-    house(d, w / 2, h * .21, min(w, h) * .32, CREAM)
-    d.text((w / 2, h * .52), title, font=font(int(w * .085)), fill=INK, anchor="mm")
-    for i, line in enumerate(lines):
-        d.text((w / 2, h * .62 + i * w * .075), line, font=font(int(w * .045)), fill=INK, anchor="mm")
+    pad = w * .07
+    tall = h > w
+    wordmark(d, pad, pad, int(w * (.075 if tall else .05)))
+    rule_y = pad + w * (.13 if tall else .085)
+    d.rectangle([pad, rule_y, w - pad, rule_y + 4], fill=AMBER)
+    row_px = int(w * (.036 if tall else .022))
+    board_rows(d, pad, rule_y + row_px * 1.6, w - 2 * pad, rows, row_px)
+    if hero:
+        # Signature move 3: the person on duty, set big in amber.
+        hy = h - pad - w * .40
+        d.text((w - pad, hy), "DISHES · GATE SINK", font=font(int(w * .032), True), fill=DIM, anchor="ra")
+        d.text((w - pad, hy + w * .05), "ARJUN", font=font(int(w * .19)), fill=AMBER, anchor="ra")
+    d.text((pad, h - pad - w * (.05 if tall else .03)), tagline, font=font(int(w * (.04 if tall else .026))), fill=PAPER)
     return img
+
+ROWS = [("TUE", "CHANA MASALA", "NOW COOKING", "now"), ("WED", "PEANUT SATAY", "CANCELLED", "cancel"),
+        ("WED", "SPINACH PASTA", "REROUTED", "ok"), ("THU", "LENTIL SOUP", "ON TIME", "ok")]
 
 files = {}
 for px in [72, 64, 88, 126, 180, 241]:
     files[f"icon-light-{px}.png"] = icon(px)
     files[f"icon-dark-{px}.png"] = icon(px, dark=True)
-files["carousel-1.png"] = poster(600, 900, "Homebase", ["Your family's memory:", "allergies, chores,", "dinners, pantry.", "", "Cooks along on your TV."])
-files["banner.png"] = poster(1200, 600, "Homebase", ["Plan dinners, split chores, cook hands-free"])
+files["carousel-1.png"] = poster(600, 900, ROWS, "Dinner departures, safely.")
+files["banner.png"] = poster(1200, 600, ROWS[:3], "Plans safe dinners, splits chores, cooks along.", hero=False)
 
 entries = []
 for name, img in files.items():
@@ -47,5 +79,5 @@ for name, img in files.items():
     (OUT / name).write_bytes(buf.getvalue())
     entries.append(f'  "{name}": "{base64.b64encode(buf.getvalue()).decode()}",')
 ts = ROOT / "apps" / "server" / "src" / "addon-media.ts"
-ts.write_text("// GENERATED by scripts/make-addon-media.py (provisional art until BRAND.md). Served at /media/<name>.\nexport const ADDON_MEDIA: Record<string, string> = {\n" + "\n".join(entries) + "\n};\n")
+ts.write_text("// GENERATED by scripts/make-addon-media.py from design/tokens.json. Served at /media/<name>.\nexport const ADDON_MEDIA: Record<string, string> = {\n" + "\n".join(entries) + "\n};\n")
 print(f"{len(files)} images → {OUT.relative_to(ROOT)}, {ts.relative_to(ROOT)} ({ts.stat().st_size // 1024} KB)")

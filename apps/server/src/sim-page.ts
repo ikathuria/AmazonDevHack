@@ -5,51 +5,53 @@ export const SIM_PAGE = /* html */ `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Homebase Alexa+ Simulator</title>
+<title>Homebase · Alexa+ simulator</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&family=Archivo:wght@500;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f6f4ef; --panel:#ffffff; --ink:#1d2321; --muted:#5d6763; --line:#e2ded5; --accent:#1f7a5c; --accent-ink:#ffffff; --warn:#a4462d; --chip:#eef4f1; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#121615; --panel:#1b2120; --ink:#ecefed; --muted:#9aa6a1; --line:#2b3330; --accent:#4fbf94; --accent-ink:#0d1211; --warn:#f08b6c; --chip:#22302b; } }
+  /* Dinner Departures tokens (design/tokens.json). Web pages use paper-on-bg; red is for safety only, amber marks "now". */
+  :root { --bg:#0E0F0C; --panel:#1A1B17; --ink:#ECE6D8; --muted:#8E8B80; --line:#24251F; --accent:#FFB84D; --accent-ink:#0E0F0C; --warn:#FF4A3D; --chip:#24251F; --ok:#5BD18B; }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  header { padding:14px 16px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
-  header h1 { font-size:18px; margin:0; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 Archivo, system-ui, sans-serif; }
+  header { padding:14px 16px; border-bottom:4px solid var(--accent); display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; font-weight:900; letter-spacing:1px; text-transform:uppercase; }
   header small { color:var(--muted); }
   main { display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap:16px; padding:16px; max-width:1200px; margin:0 auto; }
   @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
-  section { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; min-width:0; }
-  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 10px; }
+  section { background:var(--panel); border:0; border-radius:0; padding:16px; min-width:0; }
+  h2 { font-family:'JetBrains Mono', monospace; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 10px; }
   #log { height:52vh; min-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px; }
-  .msg { max-width:88%; padding:10px 12px; border-radius:12px; }
-  .you { align-self:flex-end; background:var(--accent); color:var(--accent-ink); }
-  .alexa { align-self:flex-start; background:var(--chip); }
+  .msg { max-width:88%; padding:10px 12px; border-radius:0; }
+  .you { align-self:flex-end; background:var(--chip); color:var(--ink); }
+  .alexa { align-self:flex-start; background:var(--bg); border-left:4px solid var(--accent); }
   .calls { align-self:flex-start; display:flex; gap:6px; flex-wrap:wrap; }
-  .call { font:12px ui-monospace, SFMono-Regular, Menlo, monospace; border:1px solid var(--line); border-radius:999px; padding:2px 8px; color:var(--muted); }
+  .call { font:12px 'JetBrains Mono', ui-monospace, monospace; border:1px solid var(--muted); border-radius:2px; padding:2px 8px; color:var(--muted); }
   .call.err { color:var(--warn); border-color:var(--warn); }
   form { display:flex; gap:8px; margin-top:12px; }
-  input[type=text] { flex:1; min-width:0; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; }
-  button { padding:12px 14px; border-radius:10px; border:0; background:var(--accent); color:var(--accent-ink); font:inherit; font-weight:600; cursor:pointer; }
+  input[type=text] { flex:1; min-width:0; padding:12px; border-radius:0; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; }
+  button { padding:12px 14px; border-radius:2px; border:0; background:var(--accent); color:var(--accent-ink); font:inherit; font-weight:600; cursor:pointer; }
   button.secondary { background:var(--chip); color:var(--ink); }
-  button[aria-pressed=true] { outline:3px solid var(--warn); }
+  button:focus-visible { outline:4px solid var(--accent); outline-offset:4px; }
+  button[aria-pressed=true] { outline:4px solid var(--accent); outline-offset:4px; }
   .suggest { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
   .suggest button { padding:6px 10px; font-size:13px; font-weight:500; }
   .board { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; }
   @media (max-width: 520px) { .board { grid-template-columns: 1fr; } }
-  .card { border:1px solid var(--line); border-radius:12px; padding:12px; min-width:0; }
-  .card h3 { margin:0 0 8px; font-size:15px; }
+  .card { background:var(--bg); border:0; border-radius:0; padding:12px; min-width:0; }
+  .card h3 { margin:0 0 8px; font:800 13px 'JetBrains Mono', monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
   .card ul { margin:0; padding-left:18px; }
   .cook { grid-column: 1 / -1; }
   .step { font-size:22px; line-height:1.3; margin:6px 0; }
-  .timer { font:600 28px ui-monospace, monospace; color:var(--accent); }
+  .timer { font:800 28px 'JetBrains Mono', monospace; color:var(--accent); }
   .muted { color:var(--muted); }
   .blocked { color:var(--warn); font-size:14px; margin-top:6px; }
   .heard { font-size:13px; color:var(--muted); min-height:1.4em; }
-  .today { font-weight:700; }
+  .today { font-weight:700; color:var(--accent); }
 </style>
 </head>
 <body>
 <header>
   <h1>Homebase · Alexa+ simulator</h1>
-  <small>A simulated Alexa+ experience (allowed by the hackathon rules) driving the real Homebase tools. Not an Amazon product.</small>
+  <small style="color:var(--muted)">A simulated Alexa+ experience (allowed by the hackathon rules) driving the real Homebase tools. Not an Amazon product.</small>
 </header>
 <main>
   <section aria-label="Alexa simulator">
@@ -91,7 +93,7 @@ async function send(text) {
   add("msg you", esc(text));
   $("q").value = "";
   const r = await fetch("/api/sim/converse", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ utterance: text, history }) });
-  const j = await r.json().catch(() => ({ reply: "Sorry, something went wrong." }));
+  const j = await r.json().catch(() => ({ reply: "The simulator didn't get an answer back, so nothing changed. Try again." }));
   if (j.calls?.length) add("calls", j.calls.map((c) => '<span class="call' + (c.isError ? " err" : "") + '">' + esc(c.name) + "</span>").join(""));
   add("msg alexa", esc(j.reply || j.error || "…"));
   history = j.history || history;
@@ -137,6 +139,7 @@ function apply(e) {
   else if (ev.type === "cook.step") { fetch("/households/" + HH + "/state").then((r) => r.json()).then((s) => { state = s; render(); }); return; }
   else if (ev.type === "cook.timer") timerEnd = new Date(ev.endsAt).getTime();
   else if (ev.type === "voice.heard") $("heard").textContent = 'Alexa heard: "' + ev.utterance + '"';
+  else if (ev.type === "plan.rerouted") { $("blocked").innerHTML = '<div class="blocked">⚠ ' + esc(ev.cancelled.title.toUpperCase()) + " CANCELLED · ALLERGY" + (ev.replacement ? " → " + esc(ev.replacement.title.toUpperCase()) : "") + "</div>" + $("blocked").innerHTML; return; }
   render();
 }
 
@@ -151,7 +154,7 @@ fetch("/households/" + HH + "/state").then((r) => r.json()).then((s) => {
   state = s; render();
   const es = new EventSource("/households/" + HH + "/events?after=" + s.lastSeq);
   es.onmessage = () => {};
-  ["plan.updated","chores.updated","household.updated","shopping.updated","cook.step","cook.timer","voice.heard"].forEach((t) => es.addEventListener(t, (m) => apply(JSON.parse(m.data))));
+  ["plan.updated","plan.rerouted","chores.updated","household.updated","shopping.updated","cook.step","cook.timer","voice.heard"].forEach((t) => es.addEventListener(t, (m) => apply(JSON.parse(m.data))));
 });
 </script>
 </body>
