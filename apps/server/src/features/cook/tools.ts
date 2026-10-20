@@ -9,10 +9,13 @@ function minutes(sec: number) {
   return sec % 60 === 0 ? `${sec / 60} minute${sec === 60 ? "" : "s"}` : `${Math.round(sec / 60)} minutes`;
 }
 
-async function showStep(ctx: ToolContext, recipe: Recipe, stepIndex: number, prefix = "") {
+// previous: the session being moved on from. A timer it started that is still running carries over (the rice keeps
+// cooking while you chop), so a TV or /board that loads mid-recipe still shows the countdown.
+async function showStep(ctx: ToolContext, recipe: Recipe, stepIndex: number, prefix = "", previous?: CookSession) {
   const d = docs(ctx);
   const step = recipe.steps[stepIndex];
-  const session: CookSession = { recipeId: recipe.id, stepIndex };
+  const running = previous?.recipeId === recipe.id && previous.timerEndsAt && Date.parse(previous.timerEndsAt) > ctx.now().getTime();
+  const session: CookSession = { recipeId: recipe.id, stepIndex, ...(running ? { timerEndsAt: previous.timerEndsAt } : {}) };
   await d.saveCook(session);
   await d.emit({ type: "cook.step", session, step, total: recipe.steps.length });
   const timerHint = step.timerSec ? ` Say "start the timer" for ${minutes(step.timerSec)}.` : "";
@@ -62,7 +65,7 @@ export const cookTools = [
       const c = await current(ctx);
       if (!c) return noSession;
       if (c.session.stepIndex >= c.recipe.steps.length - 1) return { text: `That was the last step of ${c.recipe.title}. Enjoy your dinner!` };
-      return showStep(ctx, c.recipe, c.session.stepIndex + 1);
+      return showStep(ctx, c.recipe, c.session.stepIndex + 1, "", c.session);
     },
   }),
   defineTool({
@@ -73,7 +76,7 @@ export const cookTools = [
     handler: async (ctx) => {
       const c = await current(ctx);
       if (!c) return noSession;
-      return showStep(ctx, c.recipe, Math.max(0, c.session.stepIndex - 1));
+      return showStep(ctx, c.recipe, Math.max(0, c.session.stepIndex - 1), "", c.session);
     },
   }),
   defineTool({
