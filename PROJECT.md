@@ -2,7 +2,7 @@
 
 > Living context map. Any LLM or human should be able to read this file alone and understand what the project is, how it's built, and where things are. **Keep it in sync.**
 
-_Last updated: 2026-10-13_
+_Last updated: 2026-10-19_
 
 ---
 
@@ -18,7 +18,7 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 |---|---|---|---|
 | Voice | Alexa+ MCP add-on (`alexa-ai` CLI; **Preview waitlisted**) → **simulated Alexa+** at `/sim`; **classic skill "home base"** for real Echo/Fire TV voice | MCP spec 2025-11-25; ASK SDK 2.14 | `skill/README.md` |
 | MCP server | @modelcontextprotocol/sdk on Hono | 1.32.1 / 4.13.13 | AWS Lambda (Node 24, arm64) + Function URL with response streaming |
-| TV | React Native for Vega (`apps/tv`, Builder 2) | per Vega SDK | spec: `docs/04-tv-handoff.md`; backstop web board at `/board` |
+| TV | React Native for Vega (`apps/tv`, Builder 2) | Vega SDK 0.24.12112, RN 0.83 | spec: `docs/04-tv-handoff.md`; runs on the Vega Virtual Device; backstop web board at `/board` |
 | Brand | "Dinner Departures" | — | `docs/BRAND.md` + `design/tokens.json` (source of truth) |
 | Contracts | TypeScript + zod | 6.0.3 / 4.6.5 | `packages/contracts` (TS 6: typescript-eslint lacks TS 7 support) |
 | Database | DynamoDB on-demand, single table, TTL on events | — | `docs/03-data-model.md` |
@@ -52,7 +52,7 @@ apps/server/            # Builder 1. Hono app: MCP, REST tools, SSE, /sim, /boar
   src/scripts/          #   seed, seed-data, bench, latency, live-journey, run-eval
   src/{app,lambda,local,worker,jobs}.ts, sim-page.ts, board-page.ts, legal-pages.ts, addon-media.ts (generated)
 skill/                  # classic Alexa skill "home base": manifest, generated interaction model, skill-id.txt, simulate.py
-apps/tv/                # Builder 2. Vega Fire TV app (not yet in the repo); spec docs/04-tv-handoff.md
+apps/tv/                # Builder 2. Vega Fire TV app (Dinner Departures board); spec docs/04-tv-handoff.md; README inside
 packages/contracts/     # shared zod schemas & types (both builders must agree on changes)
 infra/                  # CDK stack: table, server + worker Lambdas, SQS + DLQ, warm-up rule
 eval/                   # requests.json (40, agent-written), RESULTS.md (37/40), latency.md
@@ -84,21 +84,23 @@ spike/                  # M0 spike (historical)
 |---|---|---|
 | 0. Spike | ◐ | MCP + SSE proven on Lambda. Real Alexa+ deploy blocked on CLI access (organizers asked) → simulated Alexa+ is the demo path |
 | 1. Scaffold | ✅ (server side) | monorepo, CI, CDK deploy, seed. Brand done (`docs/BRAND.md`). `apps/tv` is Builder 2's |
-| 2. Core feature | ◐ | 22 tools live + tested; cancel/reroute moment; `/sim` and branded `/board` live. **Remaining: Vega TV app (critical path)** |
+| 2. Core feature | ◐ | 22 tools live + tested; cancel/reroute moment; `/sim` and branded `/board` live. Vega TV app built and running on the Vega Virtual Device (live SSE, D-pad, cancel moment). **Remaining: end-to-end acceptance run (docs/04 §7) and recording** |
 | 3. Data + evidence | ✅ | data model, export/delete, latency p95 101 ms, eval 37/40 |
-| 4. UI/UX | ◐ | `/board` and `/sim` in brand; the TV app must match. Freeze Mon Oct 19 22:00 CT |
+| 4. UI/UX | ◐ | `/board`, `/sim` and the Vega app in brand (tokens synced from `design/tokens.json`, fonts bundled). Freeze Mon Oct 19 22:00 CT |
 | 5. Auth (account linking) | ☐ | after the hackathon unless CLI access requires it sooner |
 | Hackathon M5–M7 (README, video, submit) | ◐ | README ✅, video script `docs/05`, Devpost draft `SUBMISSION.md`; record by Oct 19, rough cut Oct 20 |
 | 6. Pilot & retention gate | ☐ | Oct 26 – Nov 22 |
 | 7–9. Certify / Monetize / Polish | ☐ | gated on M6 |
 
-**In progress now:** Builder 2 on the Vega app. Classic skill live in dev stage (verified via the Alexa simulator); next: test on the real Echo/Fire TV.
+**In progress now:** Vega app acceptance run on the Virtual Device. Classic skill live in dev stage (verified via the Alexa simulator); next: test on the real Echo/Fire TV.
 **Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws`. MCP `/mcp`, simulator `/sim`, board `/board`, feed `/households/patels/events`. Redeploy with `npm run deploy`; reseed with `TABLE_NAME=<CDK output> npm run seed`.
-**Next up:** Vega app per `docs/04-tv-handoff.md`; record shots per `docs/05-demo-video-script.md`.
+**Next up:** record shots per `docs/05-demo-video-script.md` (TV shots from the Vega Virtual Device).
 
 ---
 
 ## Decision log
+
+- 2026-10-19 — The team's Fire TV (Toshiba 65C350NU) runs Fire OS 8.1.8.0, which can't run Vega apps, so the Fire TV app targets and is recorded on the Vega Virtual Device. Live updates use SSE over XMLHttpRequest (verified on the device); "today" uses the household timezone because the Virtual Device clock is UTC. No timer chime (no simple Vega sound API).
 
 - 2026-10-14 — Built classic Alexa skill "home base" (ASK CLI/SDK) as the on-device voice front end; verified the full journey via `ask smapi simulate-skill`. Invocation needs two words ("home base"). Node 24 required an async handler (friction log).
 
