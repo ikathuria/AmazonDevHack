@@ -145,12 +145,15 @@ function renderBoard() {
   const entries = [];
   for (let i = t; i < 7; i++) {
     const day = DAYS[i];
-    if (cancellations[day]) entries.push({ html: '<div class="r cancelled"><div>' + up(day) + '</div><div class="din">' + esc(up(cancellations[day].title)) + '</div><div class="st">CANCELLED · ALLERGY</div></div>' });
+    if (cancellations[day]) entries.push({ rowDay: day, html: '<div class="r cancelled"><div>' + up(day) + '</div><div class="din">' + esc(up(cancellations[day].title)) + '</div><div class="st">CANCELLED · ALLERGY</div></div>' });
     const din = stale ? "LAST WEEK'S PLAN" : (p && p.days && p.days[day] ? up(p.days[day].title) : (p && p.status === "drafting" ? "" : "OPEN"));
     const s = stale ? { cls: "past", st: "ASK FOR A NEW PLAN" } : rowStatus(day, i);
-    entries.push({ day, din, st: s.st, stHtml: !!s.html, html: '<div class="r ' + s.cls + '"><div>' + up(day) + '</div><div class="din" data-k="din-' + day + '"></div><div class="st" data-k="st-' + day + '"></div></div>' });
+    entries.push({ rowDay: day, day, din, st: s.st, stHtml: !!s.html, html: '<div class="r ' + s.cls + '"><div>' + up(day) + '</div><div class="din" data-k="din-' + day + '"></div><div class="st" data-k="st-' + day + '"></div></div>' });
   }
-  // Max 5 rows (cancelled rows included) so the board never runs under the controls or the ticker.
+  // Max 5 rows (cancelled rows included) so the board never runs under the controls or the ticker. Tonight's row and
+  // every cancelled + rerouted pair stay; the furthest-out ordinary days go first (same as fitRows in the TV app).
+  const keep = (e) => e.rowDay === DAYS[t] || !!cancellations[e.rowDay];
+  for (let i = entries.length - 1; i >= 0 && entries.length > 5; i--) if (!keep(entries[i])) entries.splice(i, 1);
   const shown = entries.slice(0, 5);
   $("board").innerHTML = shown.map((e) => e.html).join("");
   for (const r of shown.filter((e) => e.day)) {
