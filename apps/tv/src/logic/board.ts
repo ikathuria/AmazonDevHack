@@ -68,7 +68,20 @@ export function buildRows(state: BoardState, cancellations: Cancellations, local
       : rowStatus(state, cancellations, day, i === t);
     rows.push({key: `d-${day}`, day, dinner, ...s});
   }
-  return rows.slice(0, MAX_ROWS);
+  return fitRows(rows, local.weekday, cancellations);
+}
+
+// Keep the board to MAX_ROWS without hiding what matters: tonight's row and every cancelled + rerouted pair stay,
+// and the furthest-out ordinary days go first. (A plain cut would drop Friday's safe replacement on a Monday.)
+function fitRows(rows: BoardRow[], today: Weekday, cancellations: Cancellations): BoardRow[] {
+  const keep = (r: BoardRow) => r.day === today || !!cancellations[r.day];
+  const out = [...rows];
+  for (let i = out.length - 1; i >= 0 && out.length > MAX_ROWS; i--) {
+    if (!keep(out[i])) {
+      out.splice(i, 1);
+    }
+  }
+  return out.slice(0, MAX_ROWS);
 }
 
 export type Hero = {label: string; name: string} | null;

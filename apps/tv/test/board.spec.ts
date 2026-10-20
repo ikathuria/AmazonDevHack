@@ -41,13 +41,15 @@ describe('board rows', () => {
     });
   });
 
-  it('puts a cancelled dinner above the rerouted one, and still fits in 5 rows', () => {
+  it('puts a cancelled dinner above the rerouted one, and keeps both within 5 rows', () => {
     const cancellations = {
       fri: {title: 'Peanut satay noodles', reason: 'peanut butter contains peanut and Maya is allergic'},
     };
+    // On a Monday, Friday's pair would fall off a plain 5-row cut; the furthest ordinary day (Thursday) goes instead.
     const rows = buildRows(patels(), cancellations, MON);
     expect(rows).toHaveLength(MAX_ROWS);
-    expect(rows[4]).toEqual({
+    expect(rows.map((r) => r.key)).toEqual(['d-mon', 'd-tue', 'd-wed', 'x-fri', 'd-fri']);
+    expect(rows[3]).toEqual({
       key: 'x-fri',
       day: 'fri',
       dinner: 'PEANUT SATAY NOODLES',
@@ -55,6 +57,7 @@ describe('board rows', () => {
       kind: 'cancelled',
       tone: 'alert',
     });
+    expect(rows[4]).toMatchObject({dinner: 'GARLIC SPINACH PASTA', status: 'REROUTED'});
     const fromThu = buildRows(patels(), cancellations, {...MON, weekday: 'thu', d: 22});
     expect(fromThu.map((r) => [r.key, r.status])).toEqual([
       ['d-thu', 'BOARDING TONIGHT'],
