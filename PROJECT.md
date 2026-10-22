@@ -2,7 +2,7 @@
 
 > Living context map. Any LLM or human should be able to read this file alone and understand what the project is, how it's built, and where things are. **Keep it in sync.**
 
-_Last updated: 2026-10-19_
+_Last updated: 2026-10-22_
 
 ---
 
@@ -25,7 +25,7 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 | AI | Bedrock Claude Haiku 4.5 (`us.` inference profile; 5.5 not enabled) | — | SQS worker for planning; `/api/sim/converse` for the simulator; never in MCP tools |
 | Auth | Cognito (OAuth 2.1 + PKCE account linking) | — | not built yet (PLAN.md M5); every call acts on the demo household |
 | IaC | AWS CDK | 2.273.0 | `npm run deploy` |
-| Tests | Vitest + eval harness | 5.0.3 | 78 tests; `eval/latency.md`, `eval/RESULTS.md` |
+| Tests | Vitest + eval harness | 5.0.3 | 87 tests (server + contracts) + TV suite; `eval/latency.md`, `eval/RESULTS.md` |
 
 > Versions checked 2026-10-08/11. Re-verify before coding against a library.
 
@@ -92,7 +92,7 @@ spike/                  # M0 spike (historical)
 | 6. Pilot & retention gate | ☐ | Oct 26 – Nov 22 |
 | 7–9. Certify / Monetize / Polish | ☐ | gated on M6 |
 
-**In progress now:** Vega app acceptance run on the Virtual Device. Classic skill live in dev stage (verified via the Alexa simulator); next: test on the real Echo/Fire TV.
+**In progress now (2026-10-22, submission day):** Vega app acceptance run (docs/04 §7) on the Virtual Device, then record the demo video, paste its link into README and `SUBMISSION.md`, and submit on Devpost by 18:00 CT (hard deadline Fri 10-23 14:00 CT). Earlier note: Vega app acceptance run on the Virtual Device. Classic skill live in dev stage (verified via the Alexa simulator); next: test on the real Echo/Fire TV.
 **Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws`. MCP `/mcp`, simulator `/sim`, board `/board`, feed `/households/patels/events`. Redeploy with `npm run deploy`; reseed with `TABLE_NAME=<CDK output> npm run seed`.
 **Next up:** record shots per `docs/05-demo-video-script.md` (TV shots from the Vega Virtual Device).
 

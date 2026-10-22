@@ -2,7 +2,7 @@
 
 **An Alexa+ add-on that remembers your household (allergies, diets, pantry, a fair chore rota) and turns the family TV into a hands-free kitchen board.** Built for Amazon's *Build, Ship, Shape* hackathon (Alexa+ and Fire TV tracks, AWS Builder).
 
-> Status (2026-10-19): the backend and all 22 tools are live on AWS. Measured over 200 live calls: p50 71 ms, p95 101 ms, against Alexa+'s 500 ms budget. 37 of 40 household requests were routed to the right tool. Unsafe dinners are cancelled and rerouted with the reason (30+ allergen test cases). The real Alexa+ deploy is waiting on CLI access, so the simulated Alexa+ path (`/sim`) is the current demo. The Fire TV app (React Native for Vega) runs on the Vega Virtual Device and follows the live feed; `/board` is a web version of the same board. This README only claims what the code does today.
+> Status (2026-10-22): the backend and all 22 tools are live on AWS. Measured over 200 live calls: p50 71 ms, p95 101 ms, against Alexa+'s 500 ms budget. 37 of 40 household requests were routed to the right tool. Unsafe dinners are cancelled and rerouted with the reason (30+ allergen test cases). The real Alexa+ deploy is waiting on CLI access, so the simulated Alexa+ path (`/sim`) is the current demo. The Fire TV app (React Native for Vega) runs on the Vega Virtual Device and follows the live feed; `/board` is a web version of the same board. This README only claims what the code does today.
 
 ## Try it
 

@@ -128,7 +128,7 @@ Use [`docs/BRAND.md`](BRAND.md) and [`design/tokens.json`](../design/tokens.json
 - [ ] Say/type in `/sim` "plan dinners this week". The TV shows `PLANNING…`, then the dinners flap in, with no refresh.
 - [ ] **The cancel:** "make Friday peanut noodles". The TV shows the struck-through `PEANUT SATAY NOODLES · CANCELLED · ALLERGY` row, the red ticker with the reason, and the rerouted row, all within ~2 s.
 - [ ] "split the chores": today's chores appear.
-- [ ] "let's cook tonight's dinner", then "next step", then "start the timer": the step text and countdown update within ~2 s, and "Time's up!" plus a chime fire at 0.
+- [ ] "let's cook tonight's dinner", then "next step", then "start the timer": the step text and countdown update within ~2 s, and the countdown turns red and reads TIME'S UP at 0 (no chime: Vega has no simple sound API).
 - [ ] The D-pad alone can start cooking, go next/back/repeat and start a timer; the focus ring is always visible.
 - [ ] Unplug Wi-Fi for 20 s and replug: the app shows "reconnecting…", then catches up with no duplicates.
 - [ ] App runs 15+ minutes without crashing (covers at least one stream reconnect).
