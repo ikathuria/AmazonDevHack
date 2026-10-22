@@ -2,7 +2,7 @@
 
 **An Alexa+ add-on that remembers your household (allergies, diets, pantry, a fair chore rota) and turns the family TV into a hands-free kitchen board.** Built for Amazon's *Build, Ship, Shape* hackathon (Alexa+ and Fire TV tracks, AWS Builder).
 
-> Status (2026-10-22): the backend and all 22 tools are live on AWS. Measured over 200 live calls: p50 71 ms, p95 101 ms, against Alexa+'s 500 ms budget. 37 of 40 household requests were routed to the right tool. Unsafe dinners are cancelled and rerouted with the reason (30+ allergen test cases). The real Alexa+ deploy is waiting on CLI access, so the simulated Alexa+ path (`/sim`) is the current demo. The Fire TV app (React Native for Vega) runs on the Vega Virtual Device and follows the live feed; `/board` is a web version of the same board. This README only claims what the code does today.
+> Status (2026-10-22): the backend and all 22 tools are live on AWS. Measured over 200 live calls: p50 71 ms, p95 105 ms, against Alexa+'s 500 ms budget. 37 of 40 household requests were routed to the right tool. Unsafe dinners are cancelled and rerouted with the reason (30+ allergen test cases). The real Alexa+ deploy is waiting on CLI access, so the simulated Alexa+ path (`/sim`) is the current demo. The Fire TV app (React Native for Vega) runs on the Vega Virtual Device and follows the live feed; `/board` is a web version of the same board. This README only claims what the code does today.
 
 ## Try it
 
@@ -50,7 +50,7 @@ MCP tools never call an LLM; they read and write DynamoDB and return in about 10
 | The TV follows the event feed without `EventSource`, reconnects from the last event it applied, and ignores duplicates | `apps/tv/src/api/sse.ts`, `apps/tv/src/logic/model.ts` | `apps/tv/test/sse.spec.ts`, `model.spec.ts` |
 | The TV works out "tonight" in the household's timezone (the Vega Virtual Device clock is UTC) | `apps/tv/src/logic/time.ts` | `apps/tv/test/time.spec.ts` |
 | The TV's D-pad buttons call the same tools Alexa uses | `apps/tv/src/components/Controls.tsx` → `POST /api/tools/:name` | `apps/tv/test/App.spec.tsx` |
-| Every tool answers within Alexa+'s 500 ms budget | Lambda arm64 1024 MB + EventBridge warm-up (`infra/lib/homebase-stack.ts`) | [`eval/latency.md`](eval/latency.md): 200 live calls, p95 101 ms |
+| Every tool answers within Alexa+'s 500 ms budget | Lambda arm64 1024 MB + EventBridge warm-up (`infra/lib/homebase-stack.ts`) | [`eval/latency.md`](eval/latency.md): 200 live calls, p95 105 ms |
 | Households can export or delete all their data; the public demo household can't be wiped | `features/household/data-tools.ts`, `lib/store.ts` | `data-tools.test.ts` |
 | MCP spec 2025-11-25 over Streamable HTTP | `@modelcontextprotocol/sdk` 1.32.1, `WebStandardStreamableHTTPServerTransport` in `app.ts` | `app.test.ts` (real MCP client) |
 

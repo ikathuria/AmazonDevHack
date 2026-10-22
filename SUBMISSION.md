@@ -24,7 +24,7 @@ Dinner in a busy household is a negotiation, not a recipe search. So we made the
 
 ## How we built it
 - **Alexa+ MCP add-on:** a self-hosted MCP server (spec 2025-11-25, Streamable HTTP) built with the official TypeScript SDK and Hono, exposing 22 tools. One tool registry serves MCP (Alexa+), REST (the TV's D-pad) and our simulated Alexa+ agent.
-- **Latency first:** Alexa+ certification needs < 500 ms round trips, so MCP tools never call a model. They read and write DynamoDB and return in ~70 ms. Meal planning is queued on SQS and run by a worker Lambda calling Bedrock. Measured: 200 live calls, p95 101 ms.
+- **Latency first:** Alexa+ certification needs < 500 ms round trips, so MCP tools never call a model. They read and write DynamoDB and return in ~70 ms. Meal planning is queued on SQS and run by a worker Lambda calling Bedrock. Measured: 200 live calls, p95 105 ms.
 - **The TV:** Alexa+ add-ons have no Fire TV surface, so the board subscribes to our own Server-Sent Events feed (Lambda response streaming; resumable with Last-Event-ID). The Fire TV app (`apps/tv`, React Native for Vega, Vega SDK 0.24) follows the same feed. Vega has no `EventSource`, so it reads the SSE stream through `XMLHttpRequest`, which Vega delivers incrementally, reconnecting with the last event number and dropping duplicates. The D-pad calls the same tool registry as Alexa, "today" is computed in the household's timezone, and the brand fonts are bundled so the TV works offline. It runs on the Vega Virtual Device: our physical Fire TV runs Fire OS, which can't install Vega apps.
 - **Safety in code, not prompts:** the allergen verifier matches declared tags *and* ingredient names, including disguised names (groundnut, satay, arachis, ghee, tahini, marzipan…), with 30 test cases. The chore rotation is deterministic and tested for fairness over 8 weeks.
 - **AWS:** CDK stack with Lambda (arm64, Node 24), Function URL with response streaming, DynamoDB single table with TTL, SQS + DLQ, EventBridge warm-up, and Bedrock (Claude Haiku 4.5).
@@ -36,7 +36,7 @@ Dinner in a busy household is a negotiation, not a recipe search. So we made the
 - **Real-time TV updates from serverless:** Lambda instances share no memory, so the event stream polls DynamoDB once a second, with a per-household sequence counter for exactly-once resume.
 
 ## Accomplishments
-- 22 tools, p95 101 ms over 200 live calls, against a 500 ms budget.
+- 22 tools, p95 105 ms over 200 live calls, against a 500 ms budget.
 - 37/40 casual household requests routed to the right tool and arguments by an LLM client (agent-written eval set, so read it as optimistic).
 - An allergy check that can't be talked out of its answer, with 87 server and contract tests in CI (plus a separate suite for the TV app).
 - A Fire TV app on Vega that follows a live feed, reconnects without duplicating events, and handles the cancel + reroute moment (cancelled and rerouted rows always stay inside the 5-row board).

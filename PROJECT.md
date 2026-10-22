@@ -34,7 +34,7 @@ Homebase is an Alexa+ add-on (a self-hosted MCP server) plus a Fire TV (Vega OS)
 ## Architecture
 
 1. A user speaks to Alexa+ (or types/speaks on `/sim`). Alexa+ picks a Homebase MCP tool and calls `POST /mcp`; the simulator's Bedrock agent calls the same tools in-process.
-2. The server Lambda runs the tool against DynamoDB and returns in ~70 ms (p95 101 ms over 200 live calls; budget 500 ms). An EventBridge ping every 5 min keeps it warm.
+2. The server Lambda runs the tool against DynamoDB and returns in ~70 ms (p95 105 ms over 200 live calls; budget 500 ms). An EventBridge ping every 5 min keeps it warm.
 3. Every write appends a board event (`EVT#seq`). TVs load `GET /households/:id/state` once, then follow `GET /households/:id/events` (SSE; the server polls DynamoDB every 1 s; resume with `Last-Event-ID` or `?after=`).
 4. `plan_week` enqueues to SQS. The worker Lambda asks Bedrock for picks, the **allergen verifier** decides, and a deterministic picker fills gaps or takes over.
 5. `set_dinner` with an unsafe recipe cancels it, reroutes to a safe one, and emits `plan.rerouted`, which drives the board's `CANCELLED · ALLERGY` moment.
@@ -85,7 +85,7 @@ spike/                  # M0 spike (historical)
 | 0. Spike | ◐ | MCP + SSE proven on Lambda. Real Alexa+ deploy blocked on CLI access (organizers asked) → simulated Alexa+ is the demo path |
 | 1. Scaffold | ✅ (server side) | monorepo, CI, CDK deploy, seed. Brand done (`docs/BRAND.md`). `apps/tv` is Builder 2's |
 | 2. Core feature | ◐ | 22 tools live + tested; cancel/reroute moment; `/sim` and branded `/board` live. Vega TV app built and running on the Vega Virtual Device (live SSE, D-pad, cancel moment). **Remaining: end-to-end acceptance run (docs/04 §7) and recording** |
-| 3. Data + evidence | ✅ | data model, export/delete, latency p95 101 ms, eval 37/40 |
+| 3. Data + evidence | ✅ | data model, export/delete, latency p95 105 ms, eval 37/40 |
 | 4. UI/UX | ◐ | `/board`, `/sim` and the Vega app in brand (tokens synced from `design/tokens.json`, fonts bundled). Freeze Mon Oct 19 22:00 CT |
 | 5. Auth (account linking) | ☐ | after the hackathon unless CLI access requires it sooner |
 | Hackathon M5–M7 (README, video, submit) | ◐ | README ✅, video script `docs/05`, Devpost draft `SUBMISSION.md`; record by Oct 19, rough cut Oct 20 |
