@@ -94,6 +94,7 @@ spike/                  # M0 spike (historical)
 
 **In progress now (2026-10-22, submission day):** Vega app acceptance run (docs/04 §7) on the Virtual Device, then record the demo video, paste its link into README and `SUBMISSION.md`, and submit on Devpost by 18:00 CT (hard deadline Fri 10-23 14:00 CT). Earlier note: Vega app acceptance run on the Virtual Device. Classic skill live in dev stage (verified via the Alexa simulator); next: test on the real Echo/Fire TV.
 **Live server:** `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws`. MCP `/mcp`, simulator `/sim`, board `/board`, feed `/households/patels/events`. Redeploy with `npm run deploy`; reseed with `TABLE_NAME=<CDK output> npm run seed`.
+**Handoff (2026-10-22):** see `HANDOFF.md` for the remaining submission checklist.
 **Next up:** record shots per `docs/05-demo-video-script.md` (TV shots from the Vega Virtual Device).
 
 ---
