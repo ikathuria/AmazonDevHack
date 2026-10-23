@@ -1,9 +1,9 @@
 # Devpost submission (paste-ready)
 
 > **Internal, do not paste.** Deadline: Fri 2026-10-23 12:00 PT (14:00 CT). Everything below the line is final text. Still open, in order:
-> 1. Paste the public video link into the `Video` line (the only placeholder left).
+> 1. ~~Video link~~ done (https://youtu.be/95WmwJulh-w, public, 2:47).
 > 2. Read the opinion lines once: "What we learned" and each "Build again?" answer. They're written from what the friction log and code show; change any that isn't how you feel.
-> 3. Add the setup time to the Vega "Onboarding" line.
+> 3. ~~Vega setup time~~ done (about an hour).
 > 4. Attach a Vega Virtual Device screenshot (`docs/media/` has web-board shots only).
 > 5. Tick the Alexa+ and Fire TV tracks and the AWS Builder mini-challenge on the form.
 
@@ -15,7 +15,7 @@
 - **Primary track(s):** Alexa+ (primary) and Fire TV. The Fire TV app runs on the Vega Virtual Device. The Alexa+ path is a live MCP server plus the simulated Alexa+ experience, because MCP Preview access is waitlisted (see "What is real and what is simulated").
 - **Mini challenge:** AWS Builder (Lambda with response streaming, DynamoDB, SQS, EventBridge, Amazon Bedrock, CDK).
 - **Repo:** https://github.com/ikathuria/AmazonDevHack (public, MIT license visible in About)
-- **Video:** TODO_VIDEO_LINK (public YouTube/Vimeo, under 3:00)
+- **Video:** https://youtu.be/95WmwJulh-w (public YouTube, 2:47)
 - **Try it (no login, demo household "The Patels"):** base URL `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws` · `/sim` simulated Alexa+ with the live board · `/board` the Dinner Departures board · `/mcp` the MCP endpoint.
 
 ## What is real and what is simulated
@@ -103,7 +103,7 @@ Written from what we actually hit; details and dates are in `FRICTION_LOG.md`.
 - *Used for:* the Fire TV kitchen board (`apps/tv`): React Native 0.83 on Vega SDK 0.24, Vega CLI 1.4.5, the Virtual Device, Jest with the Vega preset.
 - *Worked well:* the Virtual Device ran our app with real D-pad input, and the build/run loop was short once the toolchain was installed. Bundled fonts worked once files were named after each weight's family.
 - *Needs work:* nothing tells you which Fire TV devices can run Vega apps, and our Fire TV (Fire OS 8.1.8.0) can't, so we built and recorded on the Virtual Device. The RN 0.83 docs don't cover custom fonts or streaming (`EventSource` doesn't exist; incremental `XMLHttpRequest` works). There's no simple sound-effect API (we dropped the timer chime). The Virtual Device runs on UTC, not the host timezone. `vega device run-cmd` is flaky and there's no `vega device screenshot`. The Jest preset's `Dimensions.addEventListener` mock returns `undefined`, which breaks unmount. All logged with dates in `FRICTION_LOG.md`.
-- *Onboarding:* TODO_SETUP_TIME (install, first Virtual Device run, number of attempts).
+- *Onboarding:* about an hour from installing the Vega SDK to the first run on the Virtual Device.
 - *Build again?* yes, once a Vega-capable device and the docs for current RN versions are easier to find.
 
 **Alexa Skills Kit (ASK CLI + ASK SDK for Node.js)**

@@ -4,6 +4,8 @@
 
 > Status (2026-10-22): the backend and all 22 tools are live on AWS. Measured over 200 live calls: p50 71 ms, p95 105 ms, against Alexa+'s 500 ms budget. 37 of 40 household requests were routed to the right tool. Unsafe dinners are cancelled and rerouted with the reason (30+ allergen test cases). The real Alexa+ deploy is waiting on CLI access, so the simulated Alexa+ path (`/sim`) is the current demo. The Fire TV app (React Native for Vega) runs on the Vega Virtual Device and follows the live feed; `/board` is a web version of the same board. This README only claims what the code does today.
 
+**Demo video (2:47):** https://youtu.be/95WmwJulh-w
+
 ## Try it
 
 | What | Where |
@@ -31,7 +33,7 @@ The Dinner Departures board, from the web board at `/board` (the same board the 
 
 ![Architecture](docs/media/05-architecture.png)
 
-A silent walkthrough of the board (no voiceover, not device footage): [`docs/media/homebase-board-visuals.mp4`](docs/media/homebase-board-visuals.mp4). Re-render the media with `scripts/video/make-visuals.mjs` and `make-stills.mjs`.
+A silent walkthrough of the board (the narrated demo is the YouTube video above; this one has no voiceover and no device footage): [`docs/media/homebase-board-visuals.mp4`](docs/media/homebase-board-visuals.mp4). Re-render the media with `scripts/video/make-visuals.mjs` and `make-stills.mjs`.
 
 ## The problem
 
