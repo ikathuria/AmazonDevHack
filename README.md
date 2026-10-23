@@ -18,6 +18,21 @@
 
 `<ServerUrl>` is the `HomebaseStack.ServerUrl` CDK output. The current deployment is `https://koothznswwvs4koyux64x4bs3e0msbsb.lambda-url.us-east-1.on.aws`.
 
+## Screenshots
+
+The Dinner Departures board, from the web board at `/board` (the same board the Fire TV app shows; these are not Vega Virtual Device captures). Captured against a local server with the demo household.
+
+| | |
+|---|---|
+| ![The week's dinners on the board](docs/media/01-week-plan.png) | ![An unsafe dinner cancelled and rerouted, with the red ticker](docs/media/02-cancel-allergy.png) |
+| The week's dinners, planned by voice | The cancel moment: `CANCELLED · ALLERGY`, rerouted to a safe dinner |
+| ![Chores split and tonight's dishes](docs/media/03-chores-dishes.png) | ![Cook-along step with a running timer](docs/media/04-cook-along-timer.png) |
+| Chores and "who's on dishes" | Hands-free cook-along with a timer |
+
+![Architecture](docs/media/05-architecture.png)
+
+A silent walkthrough of the board (no voiceover, not device footage): [`docs/media/homebase-board-visuals.mp4`](docs/media/homebase-board-visuals.mp4). Re-render the media with `scripts/video/make-visuals.mjs` and `make-stills.mjs`.
+
 ## The problem
 
 Dinner in a busy household is a negotiation: who's allergic to what, whose turn it is to cook or do dishes, what's already in the pantry, and a greasy phone propped up for the recipe. Alexa+ can already suggest recipes. What it doesn't keep is the household's shared memory: allergies, house rules like vegetarian Tuesdays, a fair chore history. Homebase is that memory, exposed as tools Alexa+ can call, with the family TV as the shared screen.

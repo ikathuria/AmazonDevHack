@@ -88,6 +88,11 @@ Draft from what we actually hit, with details in `FRICTION_LOG.md`. **Both of us
 - *Needs work:* `NodejsFunction` requires the entry under `projectRoot` (we had to set it for a monorepo); `logRetention` is deprecated in favor of `logGroup`; streaming handlers are hard to wrap (we shaped the EventBridge warm-up as a Function URL event instead).
 - *Build again?* DRAFT, edit: yes. Response streaming gave us SSE with no extra service, and CDK deploys in about 100 s.
 
+## Media to upload (all in `docs/media/`)
+- **Image gallery:** `01-week-plan.png`, `02-cancel-allergy.png`, `03-chores-dishes.png`, `04-cook-along-timer.png`, `05-architecture.png` (1920×1080). These are the web board, not the Vega Virtual Device: add a Virtual Device screenshot for the Fire TV track.
+- **Project thumbnail:** `thumbnail-1500x1000.png` (3:2).
+- **Video:** `homebase-board-visuals.mp4` is a silent 2:45 b-roll of the board. Add your voiceover and device footage over it, and end with `end-card-5s.mp4`.
+
 ## Optional fields
 - **Feature requests:** (1) Self-serve CLI access for hackathon accounts. Critical. (2) A Fire TV surface for MCP Apps, or a way for an add-on to target a paired Fire TV app. Important. (3) Documented minimum auth for dev-stage add-ons. Important. (4) A list of Vega-capable Fire TV devices, and a lightweight sound-effect API for Vega. Nice to have.
 - **Friction log:** paste `FRICTION_LOG.md` (it's worth up to +10%).
